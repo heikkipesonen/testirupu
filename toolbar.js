@@ -98,7 +98,7 @@ function toolbar(id){
 
 	this._opts = {
 		buttonMinWidth:128,
-		buttonMinHeight:128
+		buttonMinHeight:64
 	}
 
 	this._buttons = [];

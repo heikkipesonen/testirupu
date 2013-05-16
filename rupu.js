@@ -105,7 +105,7 @@ rupu.prototype = {
 			me._setMenu();
 			me._sortItems();
 			me._showPane('main-pane');
-			me
+			me.overlay();
 		});
 
 		$(window).resize(function(){
@@ -150,7 +150,7 @@ rupu.prototype = {
 				this._hasOverlay = true;
 				this._overlay.animate({
 					opacity:1,
-				},500);
+				},100);
 			}
 
 		} else {
@@ -456,9 +456,9 @@ rupu.prototype = {
 				me.tools.addButton({
 						text:catg,
 						id:catg,
-						span:me.getCategory(catg).length,
-						bg:colors.getColor(catg,1),
-						spancolor:[250,250,250,0.4],
+						
+						
+						
 						action:function(id){
 							me.showCategory(id);
 						},
@@ -513,6 +513,29 @@ rupu.prototype = {
 		}
 		return result;
 	},
+	_getFromCouch:function(){
+		var me = this;
+		$.ajax({
+			url:'http://cdb.ereading.metropolia.fi/reader/_design/news/_view/strdate?key=%222013.05.15%22',
+			dataType:'json',
+			success:function(e){		
+				for (var i in e.rows){
+					if (e.rows[i].value.content){
+						e.rows[i].value.image = e.rows[i].value.content;
+
+						for (var c in e.rows[i].value.image){
+							e.rows[i].value.image[c].url = 'http://ereading.metropolia.fi/puru/img/'+e.rows[i].value.image[c].name;
+						}
+					}
+
+					me._items.push( new newsitem(e.rows[i].value));
+				}
+
+				me._getCategories();
+				me._fire('load');
+			}
+		})
+	},
 	_getData:function(){
 		var me = this;		
 			$.ajax({
@@ -528,7 +551,9 @@ rupu.prototype = {
 						me._getCategories();
 						me._fire('load',me._items);
 					} else {
-						me.error(e);
+						
+
+						me._getFromCouch();
 					}
 				},
 				error:function(e){

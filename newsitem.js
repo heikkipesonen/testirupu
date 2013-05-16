@@ -55,7 +55,7 @@ newsitem.prototype = {
 				'<div class="image-container">',
 					//'<img src="../puru/img/',this.image[0].name,'" alt="" />',
 					'<img src="',this.image[0].url,'" alt="" />',
-					'<h1 style="background-color: '+colors.getColor(this.category)+'" class="news-header">'+this.title+'</h1>',
+					'<h1 style="'+colors.getBackground(this.category,0.8)+'" class="news-header">'+this.title+'</h1>',
 				'</div>',
 				].join('');
 
@@ -68,7 +68,7 @@ newsitem.prototype = {
 			'<div id="page" data-item="'+this._id+'" class="',hasImage,' scale fullheight pagecontainer">',
 				'<div id="page-scroll" class="page-scroll">',
 					'<div class="news-page">',
-						'<span style="background-color: '+colors.getColor(this.category)+'" class="category">'+this.category+'</span>',						
+						'<span style="'+colors.getBackground(this.category)+'" class="category">'+this.category+'</span>',						
 						image,
 						'<span class="author">',this.author,'</span>',
 						'<div class="textcontainer">',

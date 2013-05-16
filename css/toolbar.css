@@ -1,9 +1,12 @@
 #toolbar{
 	position: absolute;
 	top:0px;
+	
+	
 /*
-	-webkit-box-shadow: inset  0px 0px 50px rgba(0, 0, 0, 1);        
-    box-shadow: inset  0px 0px 50px rgba(0, 0, 0, 1);
+	background-color: rgb(211, 209, 185);
+-webkit-box-shadow: inset 30px 0px 50px -30px rgba(0, 0, 0, 1);        
+        box-shadow: inset 30px 0px 50px -30px rgba(0, 0, 0, 1);
 */
 }
 #toolbar_scroll #toolbar{
@@ -50,7 +53,10 @@
 
 
 
-
+#toolbar .toolbar-button.selected h4{
+	color: #232323;
+	border-bottom: 4px solid #232323;
+}
 #toolbar .toolbar-button.selected:after{
 	content:" ";
 	position: absolute;
@@ -67,21 +73,22 @@
 
 #toolbar .toolbar-button h4{
 	position: relative;
-	font-size: 20pt;
-	font-weight: normal;
+	font-size: 30pt;
+	font-weight: bold;
 	text-transform: uppercase;
-	color: #fff;
 	padding: 10px;
-
+	
 	top: 50%;
 	margin-top: -20pt;
-
-	text-shadow: 0px 0px 5px #000;
+/*
 	filter: dropshadow(color=#000, offx=0, offy=0);
+*/
+	text-shadow: 1px 1px 0px #fff;
 	-webkit-user-select:none;
 }
 
 #toolbar .toolbar-button span{
+	display: none;
 	font-size: 56pt;
 	font-weight: bold;
 	position: absolute;

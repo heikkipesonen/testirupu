@@ -70,12 +70,12 @@
 	font-size: 16pt;
 	
 	text-align: center;
-	color: #fff;
 	/*
 	font-weight: bold;
-	*/
+	color: #fff;
 	text-shadow: 0px 0px 5px #000;
 	filter: dropshadow(color=#000, offx=0, offy=0);
+	*/
 }
 
 .newsitem.tile.no-image h2{	
@@ -164,10 +164,6 @@
 		left: -170px;
 		font-size: 20pt;
 	}
-	.newsitem.tile img{
-		max-height: 700px;
-	}
-
 }
 
 
@@ -180,11 +176,6 @@
 		left: -170px;
 		font-size: 20pt;
 	}
-
-	.newsitem.tile img{
-		max-height: 700px;
-	}
-
 }
 
 

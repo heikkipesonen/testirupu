@@ -1,23 +1,16 @@
 
 var colors = {
-    etusivu:[0,0,0,0.8],
-    ulkomaat:[0,0,0,0.8],
-    uutiset:[0,105,153,0.8],
-    kulttuuri:[228,23,93,0.8],
-    urheilu:[90,55,120,0.8],
-    artikkeli:[0,136,130,0.8],
-    teema:[0,136,130,0.8],
-    defaultColor:[0,0,0,0.8],
-
-    'etusivu':[147,186,122,0.7],
-    'ulkomaat':[81, 135, 182, 1],
-    'kulttuuri':[219,101,49,0.7],
-    'urheilu':[91,195,89,0.7],
-    urheilu:[40, 162, 98, 0.7],
-    'teema':[198,45,67,0.7],
-    talous:[72, 162, 192, 0.7],
-    mielipide:[176, 192, 91, 0.7],
-    uutiset:[91, 109, 207, 0.7],
+    defaultColor:[0,0,0],
+    'etusivu':[31,187,166],
+    'kotimaa':[158,167,179],
+    'ulkomaat':[81, 135, 182],
+    'kulttuuri':[242,121,53],
+    'urheilu':[91,195,89],
+    urheilu:[40, 162, 98],
+    'teema':[198,45,67],
+    talous:[72, 162, 192],
+    mielipide:[176, 192, 91],
+    uutiset:[20, 185, 214],
 
     getBackground:function(name,opacity){
         return 'background-color:'+colors.getColor(name,opacity);
@@ -29,10 +22,10 @@ var colors = {
                 if (alpha){
                     return 'rgba('+this[name][0]+','+this[name][1]+','+this[name][2]+','+alpha+')';
                 } else {                
-                    return 'rgba('+this[name].join(',') +')';
+                    return 'rgb('+this[name].join(',') +')';
                 }
             } else {
-                return 'rgba('+this.defaultColor.join(',') +')';
+                return 'rgb('+this.defaultColor.join(',') +')';
             }
        }
     }
