@@ -16,7 +16,6 @@ function userTracker(_rupu){
 	}
 
 	this._lastSentCounter = 0;
-	this.addAction('start');
 }
 
 userTracker.prototype = {
@@ -31,58 +30,10 @@ userTracker.prototype = {
 	},
 	bind:function(){
 		var me = this;
+		
 		this._rupu.on('all',function(e,d){
+			console.log(e,d);
 			if (me[e]) me[e](d);
 		});
-	},
-	showItem:function(id){
-		if (id){
-			this.visibleitem = id;
-		}
-
-		if (this.visibleitem){	
-			this.addAction('showItem',this.visibleitem || id);
-		}
-	},
-	hideItem:function(id){
-		this.addAction('hideItem',this._rupu.getVisibleItem());
-		this.visibleitem = false;
-	},
-	showPane:function(id){
-		if (id == 'main-pane' && this.visibleitem){
-			this.hideItem();
-		} else if (id=='left-pane'){
-			this.showItem();
-		}
-	},
-	scale:function(id){
-		this.addAction('scale',[window.innerHeight,window.innerWidth]);
-	},
-	showCategory:function(name){
-		this.addAction('showCategory',name);
-	},
-	upload:function(){
-		var me=this;
-		this._db.send({
-				_id:this._id,
-				_rev:this._rev,
-				user:this._userId,
-				browser:this._userData,
-				data:this._data
-			},function(e){
-				if (e){
-					me._id = e.id;
-					me._rev = e.rev;
-					
-					me._lastSentCounter=0;
-				}
-		});
-	},
-	addAction:function(name,data){
-		this._data.push({event:name,data:data,time:Date.now()});		
-		this._lastSentCounter++;
-		if (this._lastSentCounter==this._buffer){
-			this.upload();
-		}
 	}
 }

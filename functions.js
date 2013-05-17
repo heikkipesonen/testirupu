@@ -8,9 +8,13 @@ var colors = {
     'urheilu':[91,195,89],
     urheilu:[40, 162, 98],
     'teema':[198,45,67],
-    talous:[72, 162, 192],
+    //talous:[72, 162, 192],
+    talous:[52, 102, 165],
     mielipide:[176, 192, 91],
-    uutiset:[20, 185, 214],
+    //uutiset:[20, 185, 214],
+    //uutiset:[128, 168, 184],
+    //uutiset:[100, 142, 180],
+    uutiset:[219, 206, 172],
 
     getBackground:function(name,opacity){
         return 'background-color:'+colors.getColor(name,opacity);
@@ -25,7 +29,9 @@ var colors = {
                     return 'rgb('+this[name].join(',') +')';
                 }
             } else {
-                return 'rgb('+this.defaultColor.join(',') +')';
+                if (alpha){
+                    return 'rgba('+this.defaultColor.join(',')+','+alpha +')'; 
+                } else return 'rgb('+this.defaultColor.join(',') +')';
             }
        }
     }

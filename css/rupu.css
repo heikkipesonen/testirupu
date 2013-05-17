@@ -85,19 +85,11 @@ h1,h3,h4,h2, .button-text{
 
 }
 
-p{
+p, body{
 	/*font-family: 'Oxygen', sans-serif;*/
 	font-family: 'Noto Serif', serif;
 	font-weight: 300;
 }
-
-
-
-
-#page p{
-	font-weight: 400;
-}
-
 
 #wrapper{
 	position: absolute;
@@ -106,10 +98,10 @@ p{
 	width: 100%;
 	height: 100%;
 	overflow: hidden;	
-	background-color: rgb(211, 209, 185);
 /*	
 background-image: url('creampaper.png');
-background-image: url('grey_wash_wall.png');
+	background-image: url('grey_wash_wall.png');
+	background-color: rgb(211, 209, 185);
 */
 }
 
@@ -127,6 +119,10 @@ background-image: url('grey_wash_wall.png');
 	height: 100%;
 }
 
+#main-pane-content{
+	width: 95%;
+	margin-left: 2.5%;
+}
 
 #left-pane{
 	position: absolute;
@@ -134,15 +130,6 @@ background-image: url('grey_wash_wall.png');
 	left:0px;
 	height: 100%;
 }
-
-#left-pane #page-container{
-	position: absolute;
-	right: 0px;
-	top: 0px;
-	width: 75%;
-	height: 100%;
-}
-
 
 #left-pane #list{
 
@@ -172,11 +159,16 @@ background-image: url('grey_wash_wall.png');
 	position: absolute;
 }
 
+#loading-overlay{
+	background-color: rgba(0,0,0,0.5);
+}
+
+
 #overlay{
 	background-color: rgb(211, 209, 185);
 }
 
-#overlay .main-title{
+#overlay .main-title,#loading-overlay .main-title{
 	font-size: 70pt;
 	width: 100%;
 	text-align: center;
@@ -192,7 +184,7 @@ background-image: url('grey_wash_wall.png');
 	font-weight: bold;
 }
 
-#overlay .sub-title{
+#overlay .sub-title,#loading-overlay .sub-title{
 	font-size: 20pt;
 	width: 100%;
 	text-align: center;
@@ -219,3 +211,35 @@ background-image: url('grey_wash_wall.png');
 	
 	color: #f27935;
 }
+
+
+#categoryview .category{
+	position: relative;
+	overflow: hidden;
+
+}
+
+#categoryview .category h4{
+	position: relative;
+	
+	width: 100%;
+	position: absolute;
+	font-size: 30pt;
+	font-weight: bold;
+	color: #fff;
+
+	top: 50%;
+	margin-top: -15pt;
+	text-align: center;
+}
+/*
+#categoryview .category:before{
+	content: "";
+	width: 64px;
+	height: 64px;
+	border-radius: 64px;
+	background-color: #000;
+	position: absolute;
+	left: 64px;
+	top: 0px;
+}*/

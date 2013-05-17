@@ -65,7 +65,7 @@ button.prototype = {
 	},
 	setTextColor:function(rgba){
 		this._colors.text = rgba;
-		this._element.text.css('color','rgba('+rgba.join(',')+')');
+		this._element.text.css('color',rgba);
 	},
 	setSpanColor:function(rgba){
 		this._colors.span = rgba;
@@ -153,6 +153,9 @@ toolbar.prototype = {
 			var btn = new button(data.id,data.text,data.span);
 			if (data.bg){
 				btn.setBackgroundColor(data.bg);
+			}
+			if (data.background){
+				btn.setBackgroundColor(data.background);
 			}
 			if (data.spancolor){
 				btn.setSpanColor(data.spancolor);

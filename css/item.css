@@ -1,35 +1,42 @@
 .newsitem.tile{
 	position: relative;
-	margin: 0.5%;
-	width: 32%;
-	background-color: rgba(255,255,255,1);
+	background-color: rgb(240, 240,240);
+	/*
+	background-color: rgb(211, 209, 185);
+	box-shadow:  0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+	background-color: rgba(63,63,63,1);	
+	*/
 }
 
 .newsitem.tile.has-image.wide{
 
 }
 
-.newsitem.tile{
+.newsitem.tile.has-image{
 
-	/*
-	margin: 1%;
-		border: 1px solid #aaa;
-		background-image: url('creampaper.png');
-	*/
-	box-shadow:  0px 0px 14px 0px rgba(0, 0, 0, 0.5);
+}
+
+.newsitem.tile.no-image{
+
+}
+
+
+.newsitem.tile .bottom-bar{
+	border-top: 1px dashed #aaa;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
 }
 
 .newsitem.tile .textcontainer{
+	color: #444;
 	padding: 2%;
 	font-size: 10pt;
-	color: #222;
 	line-height: 1.3em;	
 	text-align: left;
 	padding-bottom: 20px;
-	margin-bottom: 16px;
-	border-bottom: 1px solid #ddd;
-	border-top: 1px solid #222;
-	background-color: #fff;
+	margin-bottom: 16px;	
+	border-top: 1px solid #222;	
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -57,31 +64,43 @@
 	
 	border-left: 16px solid transparent;
 	border-right: 16px solid transparent;
-	border-bottom: 16px solid rgba(255,255, 255, 1);
+	border-bottom: 16px solid rgb(240, 240,240);
 }
 
+.newsitem.tile .newsitem-imagecontainer{
+	position: relative;
+}
+.newsitem.tile .header-container{
+	/*
+	background-color: #000;
+	*/
+}
 
-.newsitem.tile h2{
-	padding: 15px;
+.newsitem.tile h2{	
+	
 	padding-bottom: 20px;
 	padding-top: 20px;
 	max-width: 100%;
 	word-wrap: break-word;
-	font-size: 16pt;
-	
+	font-size: 16pt;	
 	text-align: center;
-	/*
 	font-weight: bold;
 	color: #fff;
-	text-shadow: 0px 0px 5px #000;
-	filter: dropshadow(color=#000, offx=0, offy=0);
+	/*
 	*/
 }
 
 .newsitem.tile.no-image h2{	
 	bottom: 0%;	
 	position: relative;
-	text-align: left;	
+	
+}
+
+.newsitem.tile.has-image h2{
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
 }
 
 .newsitem.tile img{
@@ -91,11 +110,10 @@
 }
 
 .newsitem.tile span{
-	font-size: 8pt;
-	color: #222;
+	font-size: 10pt;
+	color: #444;
 	padding: 0px;
 	margin: 10px;
-
 	display: inline-block;		
 }
 
@@ -154,33 +172,6 @@
 	margin-left:20px;
 	margin-right: 20px;
 }
-
-@media all and (max-width: 1200px) and (min-width: 801px){
-	.newsitem.tile{
-		width: 49%;
-	}
-
-	.category-header h2{
-		left: -170px;
-		font-size: 20pt;
-	}
-}
-
-
-@media all and (max-width: 800px){
-	.newsitem.tile{
-		width: 98%;
-	}
-
-	.category-header h2{
-		left: -170px;
-		font-size: 20pt;
-	}
-}
-
-
-
-
 
 
 

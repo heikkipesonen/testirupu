@@ -1,11 +1,18 @@
 var rupu = function(){
 	// iscroll common options
 	this.iscrollOpts = {
+		momentum:true,
+		vScrollbar:false,
+		hScrollbar:false,
+		SnapThreshold:500,
+		lockDirection:true		
+		/*
 		hScrollbar:true,
 		vScrollbar:true,
 		fadeScrollbar:true,
 		hideScrollbar:true,
 		lockDirection:true
+		*/
 	}
 
 	this.mainScrollOpts = {
@@ -25,7 +32,7 @@ var rupu = function(){
 		main : $('<div id="main-pane" class="pane"></div>'),
 		main_scroller : $('<div id="main-pane-scroller"></div>'),
 		main_content : $('<div id="main-pane-content"></div>'),
-		container : $('<div id="main"></div>'),		
+		container : $('<div id="main"></div>')
 	}
 
 	this._mainScroll = false; // iscroll for main element, the horizontal scroller
@@ -38,6 +45,24 @@ var rupu = function(){
 }
 
 rupu.prototype = {
+	showCategories:function(){
+		if (this._loaded){
+			var list = this._getCategoryNames(),
+				e = '';
+
+			for (var i in list){
+				e += '<div id="'+list[i]+'" class="category"><h4>'+list[i]+'</h4></div>';
+			}
+
+			var pg = $([
+				'<div id="categoryview">',
+					e,
+				'</div>'
+			].join(''));
+
+			this._showAtPane([pg]);
+		}
+	},
 	// start rupu
 	// container is the element for rupu run in
 	start:function(container){
@@ -47,6 +72,8 @@ rupu.prototype = {
 		this._items = [];
 		this.tools = new toolbar('toolbar');
 
+
+		
 		this.panes.container
 				.append(this.panes.left.append(this.panes.left_newscontainer))
 				.append(this.panes.main.append(this.panes.main_content))
@@ -66,7 +93,8 @@ rupu.prototype = {
 
 		this.panes.left.hammer().on('tap',function(){
 			me._showPane('main-pane');
-			me._fire('hideItem');
+			
+			me._fire('hideItem',me.getVisibleItem());
 		});
 
 		this._lastEvent = false;
@@ -102,9 +130,11 @@ rupu.prototype = {
 		this.overlay(true);
 		
 		this.on('load',function(){
+			me._loaded = true;
 			me._setMenu();
-			me._sortItems();
 			me._showPane('main-pane');
+			//me.showCategories();
+			me.showCategory('uutiset');
 			me.overlay();
 		});
 
@@ -112,19 +142,56 @@ rupu.prototype = {
 			me.overlay(true);
 			clearTimeout(me._onscale);
 
-			me._onscale = setTimeout(function(){
-				
+			me._onscale = setTimeout(function(){				
 				me.scale();
 				me.overlay(false);
+
+				me._fire('resize',[window.innerWidth,window.innerHeight]);
 			},200);
 		});
 
 		this._showPane('main-pane',0);
 		this._setMenu();
+		
 		this._fire('start');	
 		this.scale();
 
 		this._getData();
+	},
+	loading:function(show){
+		var me = this;
+		if (!this._loading){
+			this._loading= $([
+				'<div id="loading-overlay">',
+				'</div>'
+			].join('')).css({
+				position:'fixed',
+				top:'0px',
+				left:'0px',
+				width:'100%',
+				height:'100%',
+				opacity:'0'
+			});			
+		}
+		if (show){
+			if (!this._hasLoadingOverlay){
+				this._container.append(this._loading);
+				this._hasLoadingOverlay = true;
+				this._loading.animate({
+					opacity:1,
+				},100);
+			}
+
+		} else {
+			if (this._hasLoadingOverlay){
+				this._loading.animate({
+					opacity:0,
+				},500,function(){
+					me._hasLoadingOverlay = false;
+					me._loading.remove();
+				})
+			}
+		}		
 	},
 	overlay:function(show){
 		var me = this;
@@ -173,13 +240,6 @@ rupu.prototype = {
 	getVisibleItem:function(){
 		return this.panes.left.find('#page').attr('data-item');
 	},
-	// percentage values for window sizes
-	_getWidth:function(pc){
-		return pc[0]* (window.innerWidth/100)
-	},
-	_getHeight:function(pc){
-		return pc[1]* (window.innerHeight/100)
-	},
 	useBigImage:function(){
 		if (window.innerWidth > 900){
 			return true;
@@ -202,7 +262,7 @@ rupu.prototype = {
 		this.panes.left.css({
 			top:0,
 			left:0,
-			width:window.innerWidth > 700 ? (window.innerWidth*0.5 < 700 ? 700 : window.innerWidth*0.5) :  (window.innerWidth > 1000 ? 1000 : window.innerWidth)
+			width:window.innerWidth > 900 ? (window.innerWidth*0.5 < 900 ? 900 : window.innerWidth*0.5) :  (window.innerWidth > 1000 ? 1000 : window.innerWidth)
 		});
 
 		this.panes.main.css({
@@ -226,7 +286,14 @@ rupu.prototype = {
 		this._mainPos = -this.panes.left.outerWidth(true);
 		this._rightPos = -(this.panes.left.outerWidth(true) + this.panes.right.outerWidth(true));
 
-		
+		var w = this.panes.main_content.innerWidth();
+
+		var s1 = (w),
+			s2 = (w-30)/2,
+			s3 = (w-40)/3,
+			s4 = (w-50)/4;
+
+		this._itemWidth = s1 < 900 ? s1 : s2 < 600 ? s2 : s3 > 600 ? s4 : s3;
 
 		try{
 			this._scrollRefresh();
@@ -265,7 +332,7 @@ rupu.prototype = {
 		this.panes.container._translate(pos+distance,0);		
 	},
 	_checkPosition:function(){
-
+		var me = this;
 		var position = this.panes.container._getPosition().left,
 
 			diffToMain = this._mainPos-position,
@@ -287,9 +354,22 @@ rupu.prototype = {
 		if (this._lastEvent){
 			if (this._lastEvent.gesture.velocityX > 2.5){
 				if (this._lastEvent.gesture.direction == 'left'){
-					this._showPane('right-pane');
+					if (Math.abs(diffToLeft)<Math.abs(diffToMain)){						
+						me._fire('swipeTo','main-pane');
+						this._showPane('main-pane');
+					} else {						
+						me._fire('swipeTo','right-pane');
+						this._showPane('right-pane');
+					}
+
 				} else if (this._lastEvent.gesture.direction == 'right'){
-					this._showPane('left-pane');
+					if (Math.abs(diffToRight)<Math.abs(diffToMain)){
+						me._fire('swipeTo','main-pane');
+						this._showPane('main-pane');
+					} else {
+						me._fire('swipeTo','left-pane');
+						this._showPane('left-pane');
+					}
 				}
 			}
 		}
@@ -316,35 +396,26 @@ rupu.prototype = {
 		//this.panes.container._translate(position,0);
 		var diff = -this.panes.container._getPosition().left + position;
 		this._animate(diff);
-	},
-	// test news item size
-	_testSize:function(item){
-		if (item.hasClass('smallListItem')){
-			return 's';
-		} else {
-			return 'b';
-		}
-	},
+		this._fire('showPane',id);
+	},	
 	_sortSet:function(items){
 		items.sort(function(a,b){
-			if (a.priority && b.priority){
+		
 				return a.priority - b.priority;
-			} else {
-				return 0;
-			}
-		})
+			
+		});
 	},
 	// show category of items by category name
 	showItems:function(items){
-		var me = this;				
-		var e = [];
+		var me = this,
+			found = false,
+			e = [];
 
 		this._sortSet(items);
 		
-		each(items,function(item){
+		each(items,function(item){			
 			e.push(item.getTile());
 		});
-		
 
 		this._showAtPane(e);
 		this._fire('showItems',items);
@@ -354,11 +425,13 @@ rupu.prototype = {
 		this._showPane('main-pane');
 	},
 	showCategory:function(cat){
+		this.loading(true);
+
 		this.tools.selectButton(cat);
 		var items = this.getCategory(cat);
-		this._container.css('background-color',colors.getColor(cat,1));
 		this.showItems(items);
 		
+		this._container.css('background-color',colors.getColor(cat,1));
 		this._fire('showCategory',cat);		
 	},
 	// show news item in left pane display
@@ -386,7 +459,7 @@ rupu.prototype = {
 				}
 
 				container.transit({opacity:1});
-				me._pageScroll = new iScroll('page',this.iscrollOpts);
+				me._pageScroll = new iScroll('page',me.iscrollOpts);
 				me._fire('showItem',id);
 			});
 		}
@@ -401,43 +474,69 @@ rupu.prototype = {
 	_tile:function(callback){
 		var container = this.panes.main_content;
 		var me = this;		
-		
-		container.freetile({
-			containerResize:false,
-			animate:false,
-			callback:function(){
-				me._scrollRefresh();
-				me._showPane('main-pane');
+		container.imagesLoaded(function(){
 
-				container.transit({
-					opacity:1
-				},300,function(){
-					//me._fire('pageChangeReady');
-					if (typeof(callback) == 'function'){
-						callback();
-					}
-					me._fire('pageReady');
+			container.find('.tile').each(function(){
+				$(this).css('width',me._itemWidth);
+				if (parseInt( $(this).attr('priority') ) < 6 && window.innerWidth >= me._itemWidth*2 && $(this).hasClass('has-image')){
+					$(this).css('width',(me._itemWidth*2)+10);	
+				} else if (parseInt( $(this).attr('priority') )> 8 && (me._itemWidth/2)>350){
+					$(this).css('width',(me._itemWidth/2) -5);	
+				}
+
+			});
+			/*
+			var count = container.find('.category').length;
+			if (count > 0){
+				var view = container.find('#categoryview');
+				var w = me.panes.main_content.innerWidth()-10,
+					tilew = count%3 == 0 ? w/3 : w/4;
+
+				container.find('.category').each(function(){
+					
+					$(this).css({
+						display:'inline-block',
+						width:tilew,
+						height:tilew,
+						//'background-color':colors.getColor($(this).attr('id'))
+					}).find('h4').css({
+						color:colors.getColor($(this).attr('id'))
+					});
 				});
 			}
-		});
+			*/
+			var p = new Packery(container[0],{
+				itemSelector:'.tile',
+				gutter:10
+			})
 
+			me._scrollRefresh();			
+			me._showPane('main-pane');
+			
+			container.transit({
+				opacity:1
+			},500,function(){
+				me.loading(false);
+			});
+		});
 	},
 	_showAtPane:function(content){
 		var container = this.panes.main_content;
 		var me = this;
 		
 		this._fire('pageChangeStart');
-		//this._showOverlay();
-
+	
 		container.transit({
 			opacity:0
 		},200,function(){
-
+	
 			container.empty();
 		
 			each(content,function(item){
 				item.hammer().on('tap',function(){
-					me.showItem($(this).attr('id'));
+					if ($(this).hasClass('newsitem')){
+						me.showItem($(this).attr('id'));
+					}
 				});
 				container.append(item);
 
@@ -445,7 +544,7 @@ rupu.prototype = {
 
 			me._tile();
 
-		})
+		});
 	},
 	_setMenu:function(){
 		var me = this;
@@ -456,10 +555,11 @@ rupu.prototype = {
 				me.tools.addButton({
 						text:catg,
 						id:catg,
-						
+						background:colors.getColor(catg),
 						
 						
 						action:function(id){
+							me._fire('menuButtonTap',id);
 							me.showCategory(id);
 						},
 						target:catg.name
@@ -467,20 +567,6 @@ rupu.prototype = {
 		});
 	
 		me.scale();		
-	},
-	_sortItems:function(){
-		this._news.sort(function(a,b){
-			if (a.category > b.category){
-				return 1;
-			} else {
-				return -1;
-			}
-		});
-	},
-	_sortItems:function(){
-		this._items.sort(function(a,b){
-			return a.priority - b.priority;
-		});
 	},
 	_getCategories:function(){
 		var categories = {};
@@ -540,10 +626,9 @@ rupu.prototype = {
 		var me = this;		
 			$.ajax({
 				url:'http://ereading.metropolia.fi/testirupu/parser.php',
-				
+				dataType:'JSON',
 				success:function(e){
-					var rs = e;
-				
+					var rs = JSON.parse(e);
 					if (rs.status == 'ok'){
 						for (var i in rs.data){
 							me._items.push( new newsitem(rs.data[i]));

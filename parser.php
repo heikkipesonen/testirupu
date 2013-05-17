@@ -31,7 +31,6 @@
 	}
 
 	if ($simpleXml){
-		echo 'perse';
 		$paper = array(
 			'title'=>(string)$simpleXml->channel->title,
 			'description'=>(string)$simpleXml->channel->description,
