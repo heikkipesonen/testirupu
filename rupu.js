@@ -27,6 +27,7 @@ var rupu = function(){
 
 	// elements for rupu to use
 	this.panes = {	
+		top: $('<div id="top-bar"></div>'),
 		left : $('<div id="left-pane" class="pane"></div>'),
 		right : $('<div id="right-pane" class="pane"></div>'),
 		main : $('<div id="main-pane" class="pane"></div>'),
@@ -74,7 +75,7 @@ rupu.prototype = {
 
 
 		
-		this.panes.container
+		this.panes.container				
 				.append(this.panes.left.append(this.panes.left_newscontainer))
 				.append(this.panes.main.append(this.panes.main_content))
 				.append(this.panes.right);
@@ -157,6 +158,7 @@ rupu.prototype = {
 		this.scale();
 
 		this._getData();
+
 	},
 	loading:function(show){
 		var me = this;
@@ -186,7 +188,7 @@ rupu.prototype = {
 			if (this._hasLoadingOverlay){
 				this._loading.animate({
 					opacity:0,
-				},500,function(){
+				},100,function(){
 					me._hasLoadingOverlay = false;
 					me._loading.remove();
 				})
@@ -200,6 +202,7 @@ rupu.prototype = {
 				'<div id="overlay">',
 				'<h1 class="main-title">rupu 0.1</h1>',
  				'<h3 class="sub-title">Metropolia / Heikki Pesonen / 2013</h3>',
+ 				'<img src="css/load-icon.png" alt="" class="clock-icon" />',
 				'</div>'
 			].join('')).css({
 				position:'fixed',
@@ -252,11 +255,11 @@ rupu.prototype = {
 		var me = this;
 		this.panes.container._translate(0,0);
 		//this.hideTopMenu(null,true);
-		var topOffset = 0;//64;///this.panes.top.height();
+		var topOffset = 0;///this.panes.top.height();
 
 		this._container.css({
-			top:topOffset,
-			height:window.innerHeight-topOffset
+			top:0,
+			height:window.innerHeight
 		})
 
 		this.panes.left.css({
@@ -278,6 +281,7 @@ rupu.prototype = {
 		});
 
 		this.panes.container.css({
+			top: topOffset,
 			width: this.panes.left.width() + this.panes.main.width() + this.panes.right.width()
 		});
 
@@ -289,11 +293,11 @@ rupu.prototype = {
 		var w = this.panes.main_content.innerWidth();
 
 		var s1 = (w),
-			s2 = (w-30)/2,
-			s3 = (w-40)/3,
-			s4 = (w-50)/4;
+			s2 = (w-32)/2,
+			s3 = (w-46)/3,
+			s4 = (w-58)/4;
 
-		this._itemWidth = s1 < 900 ? s1 : s2 < 600 ? s2 : s3 > 600 ? s4 : s3;
+		this._itemWidth = s1 < 900 ? s1 : s2 < 500 ? s2 : s3 > 450 ? s4 : s3;
 
 		try{
 			this._scrollRefresh();
@@ -392,9 +396,8 @@ rupu.prototype = {
 		} else if (id == 'right-pane'){
 			position = -(this.panes.left.outerWidth(true) + this.panes.right.outerWidth(true));
 		}
-		
-		//this.panes.container._translate(position,0);
 		var diff = -this.panes.container._getPosition().left + position;
+
 		this._animate(diff);
 		this._fire('showPane',id);
 	},	
@@ -425,12 +428,12 @@ rupu.prototype = {
 		this._showPane('main-pane');
 	},
 	showCategory:function(cat){
-		this.loading(true);
+		
 
 		this.tools.selectButton(cat);
 		var items = this.getCategory(cat);
 		this.showItems(items);
-		
+	
 		this._container.css('background-color',colors.getColor(cat,1));
 		this._fire('showCategory',cat);		
 	},
@@ -479,9 +482,9 @@ rupu.prototype = {
 			container.find('.tile').each(function(){
 				$(this).css('width',me._itemWidth);
 				if (parseInt( $(this).attr('priority') ) < 6 && window.innerWidth >= me._itemWidth*2 && $(this).hasClass('has-image')){
-					$(this).css('width',(me._itemWidth*2)+10);	
+					$(this).css('width',(me._itemWidth*2)+17);	
 				} else if (parseInt( $(this).attr('priority') )> 8 && (me._itemWidth/2)>350){
-					$(this).css('width',(me._itemWidth/2) -5);	
+					$(this).css('width',(me._itemWidth/2) -8);	
 				}
 
 			});
@@ -507,7 +510,7 @@ rupu.prototype = {
 			*/
 			var p = new Packery(container[0],{
 				itemSelector:'.tile',
-				gutter:10
+				gutter:15
 			})
 
 			me._scrollRefresh();			
