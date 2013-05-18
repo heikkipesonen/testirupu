@@ -58,10 +58,13 @@ button.prototype = {
 	},
 	setBackgroundColor:function(rgba){
 		this._colors.background = rgba;
+		/*
 		this._element.container.css({
 			'background-color':rgba,
 			'border-color':rgba
 		});
+		*/
+		this._element.container.append('<div class="button-color-icon" style="background-color:'+rgba+'"></div>');
 	},
 	setTextColor:function(rgba){
 		this._colors.text = rgba;

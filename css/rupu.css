@@ -100,8 +100,8 @@ p, body{
 	overflow: hidden;	
 	
 /*	
-background-image: url('creampaper.png');
 	background-image: url('grey_wash_wall.png');
+background-image: url('creampaper.png');
 	background-color: rgb(211, 209, 185);
 */
 }
@@ -139,8 +139,8 @@ background-image: url('creampaper.png');
 #right-pane{
 	position: absolute;
 	height: 100%;
-	max-width: 250px;
-	min-width: 100px;
+	max-width: 350px;
+	min-width: 200px;
 	width: 25%;
 }
 

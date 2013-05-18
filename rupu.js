@@ -559,7 +559,7 @@ rupu.prototype = {
 						text:catg,
 						id:catg,
 						background:colors.getColor(catg),
-						
+						//textcolor:colors.getColor(catg),
 						
 						action:function(id){
 							me._fire('menuButtonTap',id);

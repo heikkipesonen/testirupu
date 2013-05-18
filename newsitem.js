@@ -69,11 +69,11 @@ newsitem.prototype = {
 
 			hasImage = 'has-image';
 		} else {
-			image = '<h1 style="background-color: '+colors.getColor(this.category)+'" class="news-header">'+this.title+'</h1>';
+			image = '<div class="page-header-container"><h1 style="background-color: '+colors.getColor(this.category,0.7)+'" class="news-header">'+this.title+'</h1></div>';
 		}
 
 		return $([
-			'<div id="page" data-item="'+this._id+'" class="',hasImage,' scale fullheight pagecontainer">',
+			'<div id="page" data-item="'+this._id+'" class="',hasImage,' pagecontainer">',
 				'<div id="page-scroll" class="page-scroll">',
 					'<div class="news-page">',
 						image,

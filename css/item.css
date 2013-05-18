@@ -1,8 +1,8 @@
 .newsitem.tile{
 	position: relative;
 	background-color: rgb(240, 240,240);
-	box-shadow:  0px 0px 10px 0px rgba(0, 0, 0, 0.5);
 	/*
+	box-shadow:  0px 0px 10px 0px rgba(0, 0, 0, 0.5);
 	border: 1px solid rgba(67,74,83,0.2);
 	background-color: rgb(211, 209, 185);
 	background-color: rgba(63,63,63,1);	
@@ -75,10 +75,8 @@
 .newsitem.tile .newsitem-imagecontainer{
 	position: relative;
 }
-.newsitem.tile .header-container{
-	/*
+.newsitem.tile .header-container, .page-header-container{
 	background-color: #000;
-	*/
 }
 
 .newsitem.tile h2{	
@@ -91,7 +89,7 @@
 	word-wrap: break-word;
 	font-size: 16pt;	
 	text-align: center;
-	font-weight: bold;
+	
 	color: #fff;
 	text-shadow: 0px 0px 10px #000;
 }
