@@ -15,6 +15,13 @@ newsitem.prototype = {
 		 }
 		 return has;
 	},
+	getImage:function(){
+		if (this.hasImage()){
+			return this.image[0].url;
+		} else {
+			return false;
+		}
+	},
 	getTile:function(){
 		var txt = this.getShortText();
 		var textcontainer = '';
@@ -69,7 +76,7 @@ newsitem.prototype = {
 
 			hasImage = 'has-image';
 		} else {
-			image = '<div class="page-header-container"><h1 style="background-color: '+colors.getColor(this.category,0.7)+'" class="news-header">'+this.title+'</h1></div>';
+			image = '<div class="page-header-container"><h1 style="'+colors.getBackground(this.category,0.7)+'" class="news-header">'+this.title+'</h1></div>';
 		}
 
 		return $([

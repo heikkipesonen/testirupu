@@ -90,7 +90,7 @@
 	content: "";
 	position: absolute;
 	top: -24px;
-	left: 50%;
+	left: 10%;
 	margin-left: -24px;
 	border-left: 24px solid transparent;
 	border-right: 24px solid transparent;
@@ -100,7 +100,7 @@
 	content: "";
 	position: absolute;
 	top: -23px;
-	left: 50%;
+	left: 10%;
 	margin-left: -24px;
 	border-left: 24px solid transparent;
 	border-right: 24px solid transparent;

@@ -139,9 +139,6 @@ background-image: url('creampaper.png');
 #right-pane{
 	position: absolute;
 	height: 100%;
-	max-width: 350px;
-	min-width: 200px;
-	width: 25%;
 }
 
 #date-menu{
@@ -221,33 +218,20 @@ background-image: url('creampaper.png');
 }
 
 
-#categoryview .category{
-	position: relative;
-	overflow: hidden;
-
-}
-
-#categoryview .category h4{
-	position: relative;
+#brand-display{
+	width: 100%;	
 	
-	width: 100%;
-	position: absolute;
-	font-size: 30pt;
-	font-weight: bold;
-	color: #fff;
-
-	top: 50%;
-	margin-top: -15pt;
-	text-align: center;
 }
-/*
-#categoryview .category:before{
-	content: "";
-	width: 64px;
-	height: 64px;
-	border-radius: 64px;
-	background-color: #000;
-	position: absolute;
-	left: 64px;
-	top: 0px;
-}*/
+
+#brand-display h2{
+	font-size: 40pt;
+	width: 100%;
+	text-align: center;
+	margin-top: 20px;
+	text-transform: uppercase;
+	color: #1d3037;
+	
+	text-shadow: 1px 1px 0px #fff;
+	font-weight: bold;
+}
+

@@ -1,8 +1,9 @@
 
 var colors = {
+    categories:[255,255,255],
+    //categories:[211, 209, 185],
     defaultColor:[32,34,38],
     /*
-    'etusivu':[69,109,189],
     'kulttuuri':[245,105,108],
     'teema':[198,222,100],
     'urheilu':[198,222,100],
@@ -20,12 +21,15 @@ var colors = {
     'ulkomaat':[201, 192, 95],
     'kulttuuri':[226, 101, 30],//[182, 76, 140],
     'urheilu':[91,195,89],
-    urheilu:[40, 162, 98],
+    //urheilu:[40, 162, 98],
+    urheilu:[105, 204, 191],
     'teema':[198,45,67],
     talous:[72, 162, 192],
     mielipide:[176, 192, 91],
     kotimaa:[91, 109, 207],
-    uutiset:[37, 99, 155],
+    
+    uutiset:[78, 78, 78],
+    viikonvaihde:[123, 70, 202],
 
     getBackground:function(name,opacity){
         return 'background-color:'+colors.getColor(name,opacity);

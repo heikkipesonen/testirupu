@@ -86,7 +86,7 @@ button.prototype = {
 }
 
 
-function toolbar(id){
+function toolbar(id,opts){
 	this._element = {
 		container:$('<div id="'+id+'" class="toolbar-container"></div>'),
 		scroll:$('<div class="toolbar-scroll"></div>'),
@@ -101,7 +101,7 @@ function toolbar(id){
 
 	this._opts = {
 		buttonMinWidth:128,
-		buttonMinHeight:64
+		buttonMinHeight:128
 	}
 
 	this._buttons = [];
