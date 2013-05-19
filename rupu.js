@@ -31,6 +31,7 @@ var rupu = function(){
 		top: $('<div id="top-bar"></div>'),
 		left : $('<div id="left-pane" class="pane"></div>'),
 		right : $('<div id="right-pane" class="pane"></div>'),
+		menu_container : $('<div id="menu-container"></div>'),
 		main : $('<div id="main-pane" class="pane"></div>'),
 		main_scroller : $('<div id="main-pane-scroller"></div>'),
 		main_content : $('<div id="main-pane-content"></div>'),
@@ -39,23 +40,25 @@ var rupu = function(){
 
 	this._mainScroll = false; // iscroll for main element, the horizontal scroller
 	this._pageScroll=false;	// page, item display scroller
+	this._menuScroll=false;
 	this._mainPaneScroll=false;	// main pane, the tile display scroll
 	//this._listScroll=false;
-	this.tools = {};		// toolbar
+	//this.tools = {};		// toolbar
 	this._listeners =[]; // event listeners registered for rupu
 
 
 	this._border = 0;
-	this._gutter = 5;
+	this._gutter = 15;
 }
 
 rupu.prototype = {
 	showCategories:function(){
 		if (this._loaded){
 			var list = this._getCategoryNames(),
-				e = [];
+				me = this,
+				e = this.panes.menu_container,
 
-			var brand = $([
+				brand = $([
 					'<div id="brand-display">',
 						'<h2>',this._source.title,'</h2>',
 						//'<img src="',this._source.image.url,'" alt="" />',
@@ -63,7 +66,7 @@ rupu.prototype = {
 
 			].join(''));
 
-			e.push(brand);
+			e.append(brand);
 
 			for (var i in list){
 				if (list[i]){
@@ -77,28 +80,26 @@ rupu.prototype = {
 							img = items[v].getImage();
 							break;
 						}
-					}
-
-					
+					}	
 					
 					var c = $('<div id="'+list[i]+'" class="category tile"><img src="'+img+'" alt="" /><h4 style="background-color:'+colors.getColor(list[i],0.7)+'">'+list[i]+'</h4></div>')
 					
+					c.hammer().on('tap',function(){
+						me.showCategory($(this).attr('id'));
+					});
 
 					c.css({
 						'background-color':colors.getColor(list[i]),
-						width:this._itemWidth,
-						height:this._itemWidth,
 					})
-					e.push(c);
+					e.append(c);
 
 				}
 			}
 
 			
 			this._container.css('background-color',colors.getColor('categories',1));
-			this.tools.selectButton('showCategories');
-			this._showAtPane(e);
-			this._tile();
+			this._menuScroll = new iScroll(this.panes.right.attr('id'),this.iscrollOpts);
+			this._tile();			
 		}
 	},
 	// start rupu
@@ -108,14 +109,11 @@ rupu.prototype = {
 
 		this._dummy = $('<div id="dummy" />');
 		this._items = [];
-		this.tools = new toolbar('toolbar');
-
-
 		
 		this.panes.container				
 				.append(this.panes.left.append(this.panes.left_newscontainer))
 				.append(this.panes.main.append(this.panes.main_content))
-				.append(this.panes.right);
+				.append(this.panes.right.append(this.panes.menu_container));
 				
 		$(container).append(this.panes.container);
 
@@ -163,21 +161,16 @@ rupu.prototype = {
 			me._checkPosition();
 		});
 
-		this.tools.setSize(['100%','100%'])
-		this.panes.right.css({
-			width:'148px'			
-		})
-		this.panes.right.append( this.tools.getElement() );	
 		this.overlay(true);
 		
 		this.on('load',function(){
 			me._loaded = true;
-			me._setMenu();
-			me._showPane('main-pane');
+			me.scale();
 			me.showCategories();
-			//me.showCategory('etusivu');
-			//me.showItems( me._makeFrontPage() );
+			me._showPane('right-pane');
 			me.overlay();
+
+			me._scrollRefresh();
 		});
 
 		$(window).resize(function(){
@@ -191,15 +184,9 @@ rupu.prototype = {
 				me._fire('resize',[window.innerWidth,window.innerHeight]);
 			},200);
 		});
-
-		this._showPane('main-pane',0);
-		this._setMenu();
 		
 		this._fire('start');	
-		this.scale();
-
 		this._getData();
-
 	},
 	loading:function(show){
 		var me = this;
@@ -295,7 +282,6 @@ rupu.prototype = {
 	scale:function() {		
 		var me = this;
 		this.panes.container._translate(0,0);
-		//this.hideTopMenu(null,true);
 		var topOffset = 0;///this.panes.top.height();
 
 		this._container.css({
@@ -317,6 +303,7 @@ rupu.prototype = {
 		});
 
 		this.panes.right.css({
+			width:window.innerWidth,
 			left:this.panes.left.width() + this.panes.main.width(),
 			top:0
 		});
@@ -339,18 +326,26 @@ rupu.prototype = {
 			s4 = (w- ((4*this._gutter) - (8*this._border)) )/4;
 
 		this._itemWidth = s1 < 900 ? s1 : s2 < 500 ? s2 : s3 > 450 ? s4 : s3;
-		this._tileWidth = s2 < 300 ? s2 : s3 > 300 ? s4 : s3;
+
+		var mw = this.panes.menu_container.innerWidth();		
+
+		var ms2 = (mw - 3*this._gutter) / 2,
+			ms3 = (mw - 4*this._gutter) / 3,
+			ms4 = (mw - 5*this._gutter) / 4;
+ 
+
+		this._tileWidth = ms2 < 300 ? ms2 : ms3 > 300 ? ms4 : ms3;
 
 		try{
 			this._scrollRefresh();
 			this._tile();
-			this.tools.scaleHeight();
+			//this.tools.scaleHeight();
 
 		} catch (e){
 			this.error(e);
 		}		
 		this._fire('scale');
-		this._showPane('main-pane');
+		this._showPane(this._currentPane);
 	},
 	_animate:function(distance,time){	
 		var lastStep = 0,
@@ -438,17 +433,28 @@ rupu.prototype = {
 		} else if (id == 'right-pane'){
 			position = -(this.panes.left.outerWidth(true) + this.panes.right.outerWidth(true));
 		}
+
 		var diff = -this.panes.container._getPosition().left + position;
+
+		this._currentPane = id;
 
 		this._animate(diff);
 		this._fire('showPane',id);
 	},	
 	_sortSet:function(items){
-		items.sort(function(a,b){
-		
-				return a.priority - b.priority;
-			
+		items.sort(function(a,b){		
+				return a.priority - b.priority;			
 		});
+
+		items.sort(function(a,b){
+			if (a.hasImage() && !b.hasImage()){
+				return -1;
+			} else if (!a.hasImage() && b.hasImage){
+				return 1;
+			} else {
+				return 0;
+			}
+		})
 	},
 	// show category of items by category name
 	showItems:function(items,sort){
@@ -457,7 +463,6 @@ rupu.prototype = {
 			e = [];
 
 		if (!sort){
-
 			this._sortSet(items);
 		}
 	
@@ -476,7 +481,7 @@ rupu.prototype = {
 		
 		cat = cat.toLowerCase();
 
-		this.tools.selectButton(cat);
+		//this.tools.selectButton(cat);
 		var items = this.getCategory(cat);
 		this.showItems(items);
 	
@@ -517,44 +522,63 @@ rupu.prototype = {
 		if (this._mainPaneScroll && this._mainPaneScroll!=undefined){
 			this._mainPaneScroll.destroy();
 		}
-		
+		if (this._menuScroll){
+			this._menuScroll.refresh();
+		}
+
 		this._mainPaneScroll = new iScroll('main-pane',this.iscrollOpts);						
 	},
 	_tile:function(callback){
 		var container = this.panes.main_content;
+		var menu = this.panes.right.find('#menu-container');
+		
 		var me = this;		
+		var gutter = me._gutter,
+			border = me._border;
+
+		if (menu[0]){
+
+			menu.imagesLoaded(function(){
+					menu.find('.tile').each(function(){	
+						$(this).css('width',me._tileWidth);
+						$(this).css('height',me._tileWidth);								
+					});
+
+
+					var mp = new Packery(menu[0],{				
+						gutter:gutter
+					});
+
+					me._scrollRefresh();
+			});
+		}
 		container.imagesLoaded(function(){
 
-			var gutter = me._gutter,
-				border = me._border;
-
 			container.find('.tile').each(function(){
-				$(this).css('width',me._itemWidth);
-				
-				if ($(this).hasClass('category')){
-					$(this).css('width',me._tileWidth);
-					$(this).css('height',me._tileWidth);
-				}
+				$(this).css('width',me._itemWidth);				
 
-				if ($(this).find('.newsitem-imagecontainer').height() > $(this).find('.newsitem-imagecontainer').width()){
-					$(this).addClass('tall-image');
-				}
 				
 				if ($(this).width() >= container.innerWidth()){
-					$(this).addClass('one-row');
+					$(this).addClass('one-row');					
 				} else {
 					$(this).removeClass('one-row');
+				}
+				if ($(this).find('.newsitem-imagecontainer').height() > $(this).find('.newsitem-imagecontainer').width()){
+					$(this).addClass('tall-image');
+					if ($(this).hasClass('one-row')){
+						$(this).find('.image-item-header-container').css('background-color',colors.getColor($(this).attr('category'),1));
+					}
 				}
 
 				if (parseInt( $(this).attr('priority') ) < 6 && $(this).hasClass('has-image')){
 					$(this).addClass('double-size');
-					
+					$(this).find('.image-item-header-container').css('background-color',colors.getColor($(this).attr('category'),1));
 
 					if (window.innerWidth >= me._itemWidth*2){
 						$(this).css('width',(me._itemWidth*2)+gutter+border);
 					}
-				} else if (parseInt( $(this).attr('priority') )> 8 && (me._itemWidth/2)>350){
-					$(this).css('width',(me._itemWidth/2) - (gutter) - (border*2) );	
+				} else if (parseInt( $(this).attr('priority') )> 6 && (me._itemWidth/2)>190 && $(this).hasClass('no-image')){
+					$(this).css('width',(me._itemWidth/2) - (gutter/2)-1 - (border*2) ).addClass('small-item').css('height',(me._itemWidth/2)-1 - (gutter/2) - (border*2));
 				}
 
 
@@ -591,7 +615,6 @@ rupu.prototype = {
 					if ($(this).hasClass('newsitem')){
 						me.showItem($(this).attr('id'));
 					} else if ($(this).hasClass('category')){
-
 						me.showCategory($(this).attr('id'));
 					}
 				});
@@ -602,45 +625,6 @@ rupu.prototype = {
 			me._tile();
 
 		});
-	},
-	_setMenu:function(){
-		var me = this;
-		var categories = this._getCategoryNames();		
-		me.tools.reset();
-
-		console.log(categories)
-		categories.sort(function(a,b){
-			
-			return a < b ? -1 : 1;
-
-		})
-
-		me.tools.addButton({
-			text:'kategoriat',
-			id:'showCategories',
-			background:colors.getColor('categories'),
-			action:function(){
-				me.showCategories();
-			}
-		})
-
-		each(categories,function(catg){
-				catg = catg.toLowerCase();
-				me.tools.addButton({
-						text:catg,
-						id:catg,
-						background:colors.getColor(catg),
-						//textcolor:colors.getColor(catg),
-						
-						action:function(id){
-							me._fire('menuButtonTap',id);
-							me.showCategory(id);
-						},
-						target:catg.name
-				});
-		});
-	
-		me.scale();		
 	},
 	_getCategories:function(){
 		var categories = {};
@@ -704,8 +688,8 @@ rupu.prototype = {
 	},
 	_makeFrontPage:function(){
 		var frontPage = [];
+		/*
 		var cat = this._getCategoryNames();
-
 
 		for (var i in cat){
 			if (cat[i].toLowerCase() != 'etusivu'){
@@ -720,6 +704,21 @@ rupu.prototype = {
 					if (items[c] instanceof newsitem){
 						frontPage.push( items[c] );
 					}
+				}
+			}
+		}
+		*/
+
+
+		this._items.sort(function(a,b){
+			return a.priority - b.priority;
+		})
+
+
+		for (var i = 0; i<20; i++){
+			if (this._items[i] && this._items[i] instanceof newsitem){
+				if (this._items[i].category.toLowerCase() != 'etusivu'){
+					frontPage.push(this._items[i]);
 				}
 			}
 		}

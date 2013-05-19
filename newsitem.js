@@ -35,11 +35,12 @@ newsitem.prototype = {
 
 		if (this.hasImage()){					
 			return $([
-				'<div class="newsitem tile container has-image" priority="',this.priority,'" id="'+this._id+'">',
+				'<div class="newsitem tile container has-image" category="',this.category,'" priority="',this.priority,'" id="'+this._id+'">',
 				'<div class="newsitem-imagecontainer">',
 					'<img  class="newsitem-image" src="',this.image[0].url,'" alt="" />',
 					'<div class="image-item-header-container" style="'+colors.getBackground(this.category,0.7)+'">',
 						'<h2>'+this.title+'</h2>',
+						'<div class="text-arrow"  style="'+colors.getBackground(this.category,1)+'"></div>',
 					'</div>',
 				'</div>',
 				textcontainer,
@@ -53,8 +54,8 @@ newsitem.prototype = {
 		} else {
 			return $([
 				'<div class="newsitem tile container no-image"  priority="',this.priority,'" id="'+this._id+'">',						
-					'<div class="header-container">',
-						'<h2 style="'+colors.getBackground(this.category,1)+'">'+this.title+'</h2>',
+					'<div class="header-container"  style="'+colors.getBackground(this.category,1)+'">',
+						'<h2>'+this.title+'</h2>',
 					'</div>',
 					textcontainer,	
 					'<div class="bottom-bar">',
