@@ -1,34 +1,36 @@
 
 var colors = {
-    categories:[255,255,255],
+    //categories:[255,255,255],
     //categories:[211, 209, 185],
+    //categories:[255,222,75],
+    categories:[176, 192, 91],
     defaultColor:[32,34,38],
-    /*
     'kulttuuri':[245,105,108],
-    'teema':[198,222,100],
     'urheilu':[198,222,100],
     'talous':[20,185,214],
     
+    'teema':[198,222,100],
     'uutiset':[69,109,189],
     'mielipide':[89,196,188],
     'artikkeli':[208, 212, 218],
     'kotimaa':[255,222,75],
     'ulkomaat':[94,109,129],
     
-    */
+    'kulttuuri':[226, 101, 30],//[182, 76, 140],
+    'teema':[198,45,67],
+    kotimaa:[91, 109, 207],
 
+    /*
     'etusivu':[31,187,166],
     'ulkomaat':[201, 192, 95],
-    'kulttuuri':[226, 101, 30],//[182, 76, 140],
     'urheilu':[91,195,89],
     //urheilu:[40, 162, 98],
     urheilu:[105, 204, 191],
-    'teema':[198,45,67],
     talous:[72, 162, 192],
     mielipide:[176, 192, 91],
-    kotimaa:[91, 109, 207],
     
     uutiset:[78, 78, 78],
+    */
     viikonvaihde:[123, 70, 202],
 
     getBackground:function(name,opacity){

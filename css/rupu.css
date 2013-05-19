@@ -123,6 +123,7 @@ background-image: url('creampaper.png');
 #main-pane-content{
 	width: 95%;
 	margin-left: 2.5%;
+	padding-bottom: 60px;
 }
 
 #left-pane{
@@ -227,11 +228,12 @@ background-image: url('creampaper.png');
 	font-size: 40pt;
 	width: 100%;
 	text-align: center;
-	margin-top: 20px;
+	margin-top: 60px;
+	margin-bottom: 40px;
 	text-transform: uppercase;
 	color: #1d3037;
 	
-	text-shadow: 1px 1px 0px #fff;
+	/*text-shadow: 1px 1px 0px #fff;*/
 	font-weight: bold;
 }
 

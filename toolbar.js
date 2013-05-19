@@ -27,8 +27,9 @@ button.prototype = {
 		this._element.container.removeClass('selected');
 	},
 	setAction:function(action,target){
+		var me = this;
 		this._element.container.hammer().on('tap',function(e){
-			action(target);
+			action.call(this,target);
 		});
 		//this._element.container.attr('data-action',action);
 		//this._element.container.attr('data-target',target);
@@ -169,7 +170,6 @@ toolbar.prototype = {
 			if (data.action){
 				btn.setAction(data.action,data.id);
 			}
-
 			this._element.buttonContainer.append( btn.getElement() );
 			this._buttons.push(btn);
 		},
