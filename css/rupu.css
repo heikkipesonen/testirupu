@@ -123,6 +123,7 @@ background-image: url('creampaper.png');
 #main-pane-content{
 	width: 95%;
 	margin-left: 2.5%;
+	padding-top: 60px;
 	padding-bottom: 60px;
 }
 
@@ -239,7 +240,8 @@ background-image: url('creampaper.png');
 }
 
 #menu-container{
-	width: 100%;
+	width: 90%;
+	margin-left: 5%;
 	padding-bottom: 60px;
 }
 

@@ -48,7 +48,7 @@ var rupu = function(){
 
 
 	this._border = 0;
-	this._gutter = 15;
+	this._gutter = 16;
 }
 
 rupu.prototype = {
@@ -86,6 +86,7 @@ rupu.prototype = {
 					
 					c.hammer().on('tap',function(){
 						me.showCategory($(this).attr('id'));
+						me._fire('tracker',{'action':'open_category','event_type':'menubutton_tap','data':$(this).attr('id')});
 					});
 
 					c.css({
@@ -129,7 +130,7 @@ rupu.prototype = {
 
 		this.panes.left.hammer().on('tap',function(){
 			me._showPane('main-pane');
-			
+			me._fire('tracker',{'action':'close_article','event_type':'tap','data':me.getVisibleItem()});
 			me._fire('hideItem',me.getVisibleItem());
 		});
 
@@ -180,7 +181,8 @@ rupu.prototype = {
 			me._onscale = setTimeout(function(){				
 				me.scale();
 				me.overlay(false);
-
+				
+				me._fire('tracker',{'action':'window_resize','event_type':'','data':[window.innerWidth,window.innerHeight].join(',')});
 				me._fire('resize',[window.innerWidth,window.innerHeight]);
 			},200);
 		});
@@ -265,6 +267,7 @@ rupu.prototype = {
 	error:function(e){
 		console.log(e.stack);
 
+		me._fire('tracker',{'action':'error','event_type':'error','data':e.message});
 		this.overlay(true);
 		this._overlay.append('<h3 class="error">something is not quite right just now. try again later :(</h3>')
 	},
@@ -331,10 +334,11 @@ rupu.prototype = {
 
 		var ms2 = (mw - 3*this._gutter) / 2,
 			ms3 = (mw - 4*this._gutter) / 3,
-			ms4 = (mw - 5*this._gutter) / 4;
+			ms4 = (mw - 5*this._gutter) / 4,
+			ms5 = (mw - 6*this._gutter) / 5;
  
 
-		this._tileWidth = ms2 < 300 ? ms2 : ms3 > 300 ? ms4 : ms3;
+		this._tileWidth = ms2 < 300 ? ms2 : ms3 < 300 ? ms3 : ms4 < 300 ? ms4 : ms5;
 
 		try{
 			this._scrollRefresh();
@@ -385,10 +389,24 @@ rupu.prototype = {
 		var panToLeft = Math.abs( diffToLeft ) < (this.panes.left.outerWidth(true)/2) ? true : position > this._leftPos;
 
 		if (panToright){
+			if (this._currentPane != 'right-pane'){				
+				me._fire('tracker',{'action':'show_menu','event_type':'drag','data':'right-pane'});
+			}
 			this._showPane('right-pane');
 		} else if (panToLeft){
+			if (this._currentPane != 'left-pane'){
+				me._fire('tracker',{'action':'open_article','event_type':'drag','data':this.getVisibleItem()});
+				//me._fire('tracker',{'action':'show_pane','event_type':'drag','data':'left-pane'});
+			}
+
 			this._showPane('left-pane');
 		} else {
+			if (this._currentPane == 'left-pane'){
+				me._fire('tracker',{'action':'close_article','event_type':'drag','data':this.getVisibleItem()});
+			}
+			if (this._currentPane != 'main-pane'){
+				me._fire('tracker',{'action':'open_category','event_type':'drag','data':this._currentCategory});
+			}
 			this._showPane('main-pane');
 		}
 
@@ -396,19 +414,35 @@ rupu.prototype = {
 			if (this._lastEvent.gesture.velocityX > 2.5){
 				if (this._lastEvent.gesture.direction == 'left'){
 					if (Math.abs(diffToLeft)<Math.abs(diffToMain)){						
-						me._fire('swipeTo','main-pane');
+						//me._fire('swipeTo','main-pane');
+						if (this._currentPane == 'left-pane'){
+							me._fire('tracker',{'action':'close_article','event_type':'swipe','data':this.getVisibleItem()});
+						}
+						if (this._currentPane != 'main-pane'){
+							me._fire('tracker',{'action':'open_category','event_type':'swipe','data':this._currentCategory});
+						}
 						this._showPane('main-pane');
-					} else {						
-						me._fire('swipeTo','right-pane');
-						this._showPane('right-pane');
+					} else {
+						if (this._currentPane != 'right-pane'){
+							me._fire('tracker',{'action':'close_category','event_type':'swipe','data':this._currentCategory});
+							me._fire('tracker',{'action':'show_menu','event_type':'swipe','data':'right-pane'});
+						}
+						this._showPane('right-pane');						
 					}
 
 				} else if (this._lastEvent.gesture.direction == 'right'){
 					if (Math.abs(diffToRight)<Math.abs(diffToMain)){
-						me._fire('swipeTo','main-pane');
+						//me._fire('swipeTo','main-pane');
+						if (this._currentPane != 'main-pane'){
+							me._fire('tracker',{'action':'open_category','event_type':'swipe','data':this._currentCategory});
+						}
 						this._showPane('main-pane');
 					} else {
-						me._fire('swipeTo','left-pane');
+						//me._fire('swipeTo','left-pane');
+						if (this._currentPane != 'left-pane'){
+							me._fire('tracker',{'action':'open_article','event_type':'swipe','data':this.getVisibleItem()});
+							me._fire('tracker',{'action':'show_pane','event_type':'swipe','data':'left-pane'});
+						}
 						this._showPane('left-pane');
 					}
 				}
@@ -473,20 +507,16 @@ rupu.prototype = {
 		this._showAtPane(e);
 		this._fire('showItems',items);
 	},
-	showAll:function(){
-		this.showItems(this._news.getItems());
-		this._showPane('main-pane');
-	},
 	showCategory:function(cat){
 		
 		cat = cat.toLowerCase();
 
-		//this.tools.selectButton(cat);
 		var items = this.getCategory(cat);
 		this.showItems(items);
 	
 		this._container.css('background-color',colors.getColor(cat,1));
-		this._fire('showCategory',cat);		
+		this._fire('showCategory',cat);	
+		this._currentCategory = cat;
 	},
 	// show news item in left pane display
 	showItem:function(id,scrollTo){
@@ -504,6 +534,7 @@ rupu.prototype = {
 				opacity:0,
 			},200,function(){
 				container.html(e);
+
 				if (scrollTo!=false){
 					me._showPane('left-pane');
 				}
@@ -515,6 +546,8 @@ rupu.prototype = {
 				container.transit({opacity:1});
 				me._pageScroll = new iScroll('page',me.iscrollOpts);
 				me._fire('showItem',id);
+
+				//me._fire('tracker',{'action':'open_article','event_type':'tap','data':id});
 			});
 		}
 	},
@@ -524,6 +557,10 @@ rupu.prototype = {
 		}
 		if (this._menuScroll){
 			this._menuScroll.refresh();
+		}
+
+		if (this._pageScroll){
+			this._pageScroll.refresh();
 		}
 
 		this._mainPaneScroll = new iScroll('main-pane',this.iscrollOpts);						
@@ -578,7 +615,9 @@ rupu.prototype = {
 						$(this).css('width',(me._itemWidth*2)+gutter+border);
 					}
 				} else if (parseInt( $(this).attr('priority') )> 6 && (me._itemWidth/2)>190 && $(this).hasClass('no-image')){
-					$(this).css('width',(me._itemWidth/2) - (gutter/2)-1 - (border*2) ).addClass('small-item').css('height',(me._itemWidth/2)-1 - (gutter/2) - (border*2));
+					$(this).css('width',Math.floor( ((me._itemWidth - gutter) /2) - (border*2)-1 ))
+							.css('height',(me._itemWidth/2) - (gutter/2) - (border*2))
+							.addClass('small-item');
 				}
 
 
@@ -613,7 +652,8 @@ rupu.prototype = {
 			each(content,function(item){
 				item.hammer().on('tap',function(){
 					if ($(this).hasClass('newsitem')){
-						me.showItem($(this).attr('id'));
+						me.showItem($(this).attr('id'));	
+						me._fire('tracker',{'action':'open_article','event_type':'tap','data':$(this).attr('id')});
 					} else if ($(this).hasClass('category')){
 						me.showCategory($(this).attr('id'));
 					}

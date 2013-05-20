@@ -1,10 +1,4 @@
 <?php
-
-
-	//$dbUrl = 'http://cdb.ereading.metropolia.fi/reader';
-	//$keyPhraseUrl = 'http://ereading.metropolia.fi/JujuWeb/rest/keyphrase';
-	//$bulk = '/_bulk_docs';
-
 	date_default_timezone_set('Europe/Helsinki');
 	
 	function microtime_float()
