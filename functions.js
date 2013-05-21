@@ -87,6 +87,34 @@ $.fn.extend({
     }
 });
 
+function fnqueue(callback){
+    this._queue = [];
+    this._callback = callback || function(){};
+}
+
+fnqueue.prototype = {
+    add:function(fn){
+        this._queue.push(fn);
+    },    
+    exec:function(){
+        var fn = this._queue.shift(),
+            me = this;
+        
+        if (fn){
+            fn(function(){
+                if (me._queue.length > 0){
+                    me.exec();
+                } else {
+                    me._callback(me);
+                }
+            });       
+        } else {
+            this._callback();
+        }
+    }
+}
+
+
 function getId() {
     // http://www.ietf.org/rfc/rfc4122.txt
     var s = [];
@@ -147,6 +175,7 @@ function each(arr,fn){
 
 
 var dateParser = {
+    days:['sunnuntai','maanantai','tiistai','keskiviikko','torstai','perjantai','lauantai'],
     strangeDate:{
         getMonth:function(dateString){
             return dateString.split('.')[2];
@@ -168,7 +197,12 @@ var dateParser = {
     getDay:function(dateString){
         return dateString.split('.')[0];
     },
+    getDate:function(timestamp){
+        var d = new Date(timestamp),
+            str = d.getDate() +'.'+ (d.getMonth()+1) +'.' +d.getFullYear();
 
+        return str;
+    },
     convert:function(strangeDate){
         if (strangeDate){
             return strangeDate.split('.')[2] +'.'+ strangeDate.split('.')[1] +'.'+strangeDate.split('.')[0];

@@ -11,6 +11,8 @@
 			$str = 'SELECT * FROM user_action WHERE session_id ="'.$_GET['session'].'"';
 		} else if ($_GET['user_session']){
 			$str = 'SELECT * FROM user WHERE session_id ="'.$_GET['user_session'].'"';
+		} else if ($_GET['user_articles']){
+			$str = 'SELECT data, action, client_time FROM user_action WHERE user_id="'.$_GET['user_articles'].'" AND action="open_article"';
 		}
 		
 		if ($str){

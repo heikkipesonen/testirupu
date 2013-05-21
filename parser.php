@@ -27,6 +27,7 @@
 	if ($simpleXml){
 		$paper = array(
 			'title'=>(string)$simpleXml->channel->title,
+			'timestamp'=>microtime_float(),
 			'description'=>(string)$simpleXml->channel->description,
 			'image'=>array(
 				'url'=>(string)$simpleXml->channel->image->url,

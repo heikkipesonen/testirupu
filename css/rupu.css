@@ -121,8 +121,8 @@ background-image: url('creampaper.png');
 }
 
 #main-pane-content{
-	width: 95%;
-	margin-left: 2.5%;
+	width: 90%;
+	margin-left: 5%;
 	padding-top: 60px;
 	padding-bottom: 60px;
 }
@@ -223,20 +223,32 @@ background-image: url('creampaper.png');
 
 #brand-display{
 	width: 100%;	
-	
+	height: 170px;
+	position: relative;
+
 }
 
-#brand-display h2{
-	font-size: 40pt;
+#brand-display h2.title{
+	font-size: 36pt;
 	width: 100%;
 	text-align: center;
-	margin-top: 60px;
-	margin-bottom: 40px;
 	text-transform: uppercase;
-	color: #1d3037;
-	
-	/*text-shadow: 1px 1px 0px #fff;*/
+	color: #1d3037;	
+	position: absolute;
+	top: 50%;
+	margin-top: -18pt;
+
+	/*text-shadow: 1px 1px 0px #aaa;*/
 	font-weight: bold;
+}
+
+#brand-display h2.datetime{
+	font-size: 20pt;
+	position: absolute;
+	left: 0px;
+	bottom: 20px;
+	width: 100%;
+	text-align: center;
 }
 
 #menu-container{
@@ -245,3 +257,36 @@ background-image: url('creampaper.png');
 	padding-bottom: 60px;
 }
 
+#menu-container-scroller{
+	width: 100%;
+	position: relative;
+	margin: 0px;
+	padding: 0px;
+}
+
+@media screen and (max-width: 600px){
+	#brand-display h2.title{
+		font-size: 20pt;
+	}
+
+	#brand-display h2.datetime{
+		font-size: 16pt;
+	}
+
+	#overlay .main-title,#loading-overlay .main-title{
+		font-size: 30pt;
+	}
+
+	#overlay .sub-title,#loading-overlay .sub-title{
+		font-size: 16pt;
+	}
+	
+	#overlay img{
+		position: absolute;
+		right: 0px;
+		bottom: 0px;
+		opacity: 0.2;
+		width: 25%;
+
+	}
+}

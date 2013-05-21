@@ -1,3 +1,9 @@
+var //smallImageURL = 'http://ereading.metropolia.fi/puru/img/small/',
+	smallImageURL = 'http://ereading.metropolia.fi/puru/img/',
+	imageURL = 'http://ereading.metropolia.fi/puru/img/',
+	parserURL = 'parser.php';
+
+
 var rupu = function(){
 	// iscroll common options
 	this.iscrollOpts = {
@@ -6,24 +12,7 @@ var rupu = function(){
 		hScrollbar:false,
 		SnapThreshold:500,
 		lockDirection:true		
-		/*
-		hScrollbar:true,
-		vScrollbar:true,
-		fadeScrollbar:true,
-		hideScrollbar:true,
-		lockDirection:true
-		*/
 	}
-
-	this.mainScrollOpts = {
-		snap:'.pane',
-		momentum:false,
-		vScrollbar:false,
-		hScrollbar:false,
-		SnapThreshold:500,
-		lockDirection:true
-	}
-
 
 	// elements for rupu to use
 	this.panes = {	
@@ -32,6 +21,7 @@ var rupu = function(){
 		left : $('<div id="left-pane" class="pane"></div>'),
 		right : $('<div id="right-pane" class="pane"></div>'),
 		menu_container : $('<div id="menu-container"></div>'),
+		menu_container_scroller : $('<div id="menu-container-scroller"></div>'),
 		main : $('<div id="main-pane" class="pane"></div>'),
 		main_scroller : $('<div id="main-pane-scroller"></div>'),
 		main_content : $('<div id="main-pane-content"></div>'),
@@ -42,13 +32,11 @@ var rupu = function(){
 	this._pageScroll=false;	// page, item display scroller
 	this._menuScroll=false;
 	this._mainPaneScroll=false;	// main pane, the tile display scroll
-	//this._listScroll=false;
-	//this.tools = {};		// toolbar
 	this._listeners =[]; // event listeners registered for rupu
-
 
 	this._border = 0;
 	this._gutter = 16;
+
 }
 
 rupu.prototype = {
@@ -60,7 +48,8 @@ rupu.prototype = {
 
 				brand = $([
 					'<div id="brand-display">',
-						'<h2>',this._source.title,'</h2>',
+						'<h2 class="title">',this._source.title,'</h2>',
+						'<h2 class="datetime">',dateParser.getDate(this._source.timestamp*1000),'</h2>',
 						//'<img src="',this._source.image.url,'" alt="" />',
 					,'</div>'
 
@@ -77,12 +66,13 @@ rupu.prototype = {
 
 					for (var v in items){
 						if (items[v].hasImage()){
-							img = items[v].getImage();
+
+							img = '<img src="'+smallImageURL+items[v].getImageName()+'"/>';
 							break;
 						}
 					}	
 					
-					var c = $('<div id="'+list[i]+'" class="category tile"><img src="'+img+'" alt="" /><h4 style="background-color:'+colors.getColor(list[i],0.7)+'">'+list[i]+'</h4></div>')
+					var c = $('<div id="'+list[i]+'" class="category tile">'+img+'<h4 style="background-color:'+colors.getColor(list[i],0.7)+'">'+list[i]+'</h4></div>')
 					
 					c.hammer().on('tap',function(){
 						me.showCategory($(this).attr('id'));
@@ -92,6 +82,7 @@ rupu.prototype = {
 					c.css({
 						'background-color':colors.getColor(list[i]),
 					})
+
 					e.append(c);
 
 				}
@@ -100,7 +91,7 @@ rupu.prototype = {
 			
 			this._container.css('background-color',colors.getColor('categories',1));
 			this._menuScroll = new iScroll(this.panes.right.attr('id'),this.iscrollOpts);
-			this._tile();			
+			this._tile();
 		}
 	},
 	// start rupu
@@ -113,8 +104,8 @@ rupu.prototype = {
 		
 		this.panes.container				
 				.append(this.panes.left.append(this.panes.left_newscontainer))
-				.append(this.panes.main.append(this.panes.main_content))
-				.append(this.panes.right.append(this.panes.menu_container));
+				.append(this.panes.main.append(this.panes.main_scroller.append(this.panes.main_content)))
+				.append(this.panes.right.append(this.panes.menu_container_scroller.append(this.panes.menu_container)));
 				
 		$(container).append(this.panes.container);
 
@@ -146,7 +137,6 @@ rupu.prototype = {
 
 		this.panes.container.hammer().on('dragleft dragright',function(e){
 			var dist = 0;
-
 			if (me._lastEvent){
 				dist = e.gesture.deltaX- me._lastEvent.gesture.deltaX;
 			}
@@ -231,7 +221,7 @@ rupu.prototype = {
 			this._overlay= $([
 				'<div id="overlay">',
 				'<h1 class="main-title">rupu 0.1</h1>',
- 				'<h3 class="sub-title">Metropolia / Heikki Pesonen / 2013</h3>',
+ 				'<h3 class="sub-title">Metropolia AMK / Heikki Pesonen / 2013</h3>',
  				'<img src="css/load-icon.png" alt="" class="clock-icon" />',
 				'</div>'
 			].join('')).css({
@@ -267,7 +257,7 @@ rupu.prototype = {
 	error:function(e){
 		console.log(e.stack);
 
-		me._fire('tracker',{'action':'error','event_type':'error','data':e.message});
+		this._fire('tracker',{'action':'error','event_type':'error','data':e.message});
 		this.overlay(true);
 		this._overlay.append('<h3 class="error">something is not quite right just now. try again later :(</h3>')
 	},
@@ -324,26 +314,27 @@ rupu.prototype = {
 		var w = this.panes.main_content.innerWidth();
 
 		var s1 = (w),
-			s2 = (w- ((2*this._gutter) - (4*this._border)) )/2,
-			s3 = (w- ((3*this._gutter) - (6*this._border)) )/3,
-			s4 = (w- ((4*this._gutter) - (8*this._border)) )/4;
+			s2 = (w- ((1*this._gutter) - (4*this._border)) )/2,
+			s3 = (w- ((2*this._gutter) - (6*this._border)) )/3,
+			s4 = (w- ((3*this._gutter) - (8*this._border)) )/4;
 
 		this._itemWidth = s1 < 900 ? s1 : s2 < 500 ? s2 : s3 > 450 ? s4 : s3;
+		this._itemWidth--;
 
 		var mw = this.panes.menu_container.innerWidth();		
 
-		var ms2 = (mw - 3*this._gutter) / 2,
-			ms3 = (mw - 4*this._gutter) / 3,
-			ms4 = (mw - 5*this._gutter) / 4,
-			ms5 = (mw - 6*this._gutter) / 5;
+		var ms2 = (mw - 1*this._gutter) / 2,
+			ms3 = (mw - 2*this._gutter) / 3,
+			ms4 = (mw - 3*this._gutter) / 4,
+			ms5 = (mw - 4*this._gutter) / 5;
  
 
 		this._tileWidth = ms2 < 300 ? ms2 : ms3 < 300 ? ms3 : ms4 < 300 ? ms4 : ms5;
+		this._tileWidth--;
 
 		try{
 			this._scrollRefresh();
 			this._tile();
-			//this.tools.scaleHeight();
 
 		} catch (e){
 			this.error(e);
@@ -385,7 +376,7 @@ rupu.prototype = {
 			diffToLeft = this._leftPos-position;
 
 		
-		var panToright = Math.abs( diffToRight )< (this.panes.right.outerWidth(true)/2) ? true : position < this._rightPos;
+		var panToright = Math.abs( diffToRight )< (this.panes.right.outerWidth(true)/1.5) ? true : position < this._rightPos;
 		var panToLeft = Math.abs( diffToLeft ) < (this.panes.left.outerWidth(true)/2) ? true : position > this._leftPos;
 
 		if (panToright){
@@ -456,7 +447,12 @@ rupu.prototype = {
 		}
 		var position = 0;
 		if (id == 'main-pane'){
-			position = -this.panes.left.outerWidth(true);
+			if (this._currentCategory){
+				position = -this.panes.left.outerWidth(true);				
+			} else {
+				this._showPane('right-pane');
+				return;
+			}
 		} else if (id == 'left-pane'){
 			if (this.panes.left.children().length > 0){			
 				position = 0;
@@ -500,7 +496,7 @@ rupu.prototype = {
 			this._sortSet(items);
 		}
 	
-		each(items,function(item){			
+		each(items,function(item){
 			e.push(item.getTile());
 		});
 
@@ -510,13 +506,13 @@ rupu.prototype = {
 	showCategory:function(cat){
 		
 		cat = cat.toLowerCase();
+		this._currentCategory = cat;
 
 		var items = this.getCategory(cat);
 		this.showItems(items);
 	
 		this._container.css('background-color',colors.getColor(cat,1));
 		this._fire('showCategory',cat);	
-		this._currentCategory = cat;
 	},
 	// show news item in left pane display
 	showItem:function(id,scrollTo){
@@ -530,24 +526,44 @@ rupu.prototype = {
 		} else {
 			var e = this._getItem(id).getFull();
 
-			container.transit({
-				opacity:0,
-			},200,function(){
-				container.html(e);
+			container.imagesLoaded(function(){
+				
+				container.transit({
+					opacity:0,
+				},200,function(){
+					container.html(e);
 
-				if (scrollTo!=false){
-					me._showPane('left-pane');
-				}
+					if (scrollTo!=false){
+						me._showPane('left-pane');
+					}
 
-				if (me._pageScroll){
-					me._pageScroll.destroy();
-				}
+					if (me._pageScroll){
+						me._pageScroll.destroy();
+					}
 
-				container.transit({opacity:1});
-				me._pageScroll = new iScroll('page',me.iscrollOpts);
-				me._fire('showItem',id);
+					container.find('img').each(function(){						
+						if ($(this).outerHeight() > $(this).outerWidth()){							
+							container.find('.news-page').addClass('tall-image');
+						}						
+					});
 
-				//me._fire('tracker',{'action':'open_article','event_type':'tap','data':id});
+					container.find('p, h1, h2, h3, h4, span').each(function(){
+						$(this).addClass('hyphenate text').attr('lang','fi');
+					});
+
+					/*
+					Hyphenator.config({
+						onhyphenationdonecallback:function(){
+						}
+					});
+					*/
+					container.transit({opacity:1});
+					
+					me._pageScroll = new iScroll('page',me.iscrollOpts);
+					me._fire('showItem',id);
+
+					//me._fire('tracker',{'action':'open_article','event_type':'tap','data':id});
+				});
 			});
 		}
 	},
@@ -565,6 +581,7 @@ rupu.prototype = {
 
 		this._mainPaneScroll = new iScroll('main-pane',this.iscrollOpts);						
 	},
+
 	_tile:function(callback){
 		var container = this.panes.main_content;
 		var menu = this.panes.right.find('#menu-container');
@@ -576,9 +593,11 @@ rupu.prototype = {
 		if (menu[0]){
 
 			menu.imagesLoaded(function(){
-					menu.find('.tile').each(function(){	
-						$(this).css('width',me._tileWidth);
-						$(this).css('height',me._tileWidth);								
+					menu.find('.tile').each(function(){							
+						$(this).css({
+							'width':me._tileWidth,
+							'height':me._tileWidth,							
+						});
 					});
 
 
@@ -586,16 +605,19 @@ rupu.prototype = {
 						gutter:gutter
 					});
 
-					me._scrollRefresh();
+					me._scrollRefresh();					
 			});
-		}
+		}		
+
 		container.imagesLoaded(function(){
 
 			container.find('.tile').each(function(){
-				$(this).css('width',me._itemWidth);				
+				$(this).css({
+					'width':me._itemWidth,
+				});
 
 				
-				if ($(this).width() >= container.innerWidth()){
+				if ($(this).width() >= 0.8*container.innerWidth()){
 					$(this).addClass('one-row');					
 				} else {
 					$(this).removeClass('one-row');
@@ -614,9 +636,10 @@ rupu.prototype = {
 					if (window.innerWidth >= me._itemWidth*2){
 						$(this).css('width',(me._itemWidth*2)+gutter+border);
 					}
-				} else if (parseInt( $(this).attr('priority') )> 6 && (me._itemWidth/2)>190 && $(this).hasClass('no-image')){
-					$(this).css('width',Math.floor( ((me._itemWidth - gutter) /2) - (border*2)-1 ))
-							.css('height',(me._itemWidth/2) - (gutter/2) - (border*2))
+				} else if (parseInt( $(this).attr('priority') )> 6 && (me._itemWidth/2)>190 && $(this).hasClass('no-image') && container.find('.tile').length > 4){
+					var w = (me._itemWidth - gutter)/2 > 300 ? (me._itemWidth - 2*gutter)/3 : (me._itemWidth - gutter)/2;
+					$(this).css('width',Math.floor( (w) - (border*2)-1 ))
+							//.css('height',((me._itemWidth/2) - (gutter/2) - (border*2))/2 )
 							.addClass('small-item');
 				}
 
@@ -628,10 +651,11 @@ rupu.prototype = {
 			});
 
 			me._scrollRefresh();			
-			
+			//Hyphenator.run();
+
 			container.transit({
 				opacity:1
-			},500,function(){
+			},200,function(){
 				me.loading(false);
 			});
 		});
@@ -650,6 +674,11 @@ rupu.prototype = {
 			container.empty();
 		
 			each(content,function(item){
+				item.find('p, h1, h2, h3, h4').each(function(){
+					$(this).addClass('hyphenate text').attr('lang','fi');
+				});
+
+				
 				item.hammer().on('tap',function(){
 					if ($(this).hasClass('newsitem')){
 						me.showItem($(this).attr('id'));	
@@ -683,7 +712,9 @@ rupu.prototype = {
 		this._getCategories();
 		var result = [];
 		for (var i in this._categories){
-			result.push(i);
+			if (i.toLowerCase()!='etusivu'){
+				result.push(i);
+			}
 		}
 		return result;
 	},
@@ -728,28 +759,6 @@ rupu.prototype = {
 	},
 	_makeFrontPage:function(){
 		var frontPage = [];
-		/*
-		var cat = this._getCategoryNames();
-
-		for (var i in cat){
-			if (cat[i].toLowerCase() != 'etusivu'){
-				var items = this.getCategory(cat[i]);
-
-				items.sort(function(a,b){
-					return a.priority - b.priority;
-				});
-
-				
-				for (var c=0; c<4; c++){
-					if (items[c] instanceof newsitem){
-						frontPage.push( items[c] );
-					}
-				}
-			}
-		}
-		*/
-
-
 		this._items.sort(function(a,b){
 			return a.priority - b.priority;
 		})
@@ -776,29 +785,16 @@ rupu.prototype = {
 
 		return frontPage;
 	},
-	_showBrand:function(data){
-		var container = this.panes.brand;
-
-		container.empty();
-		container.append( $([
-			'<h3>',data.title,'</h3>',
-			'<img src="',data.image.url,'" alt="">',
-			].join('')) );
-
-		//this._container.append(this.panes.brand);
-	},
 	_getData:function(){
 		var me = this;		
 			$.ajax({
-				url:'http://ereading.metropolia.fi/testirupu/parser.php',
+				url:parserURL,
 				dataType:'JSON',
 				success:function(e){
 					var rs = JSON.parse(e);
 
 					
-					if (rs.status == 'ok'){
-						me._showBrand(rs.source);
-
+					if (rs.status == 'ok'){						
 						for (var i in rs.data){
 							me._items.push( new newsitem(rs.data[i]));
 						}								
