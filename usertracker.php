@@ -1,36 +1,28 @@
 <?php
 	session_start();
-	if (isset($_GET)){
-		if ($_GET['user']=='list'){
-			$str = 'SELECT  DISTINCT user_id FROM user';
-		} else if ($_GET['user']=='sessions' && $_GET['user_id']){
-			$str = 'SELECT  DISTINCT session_id FROM user_action WHERE user_id="'.$_GET["user_id"].'"';
-		} else if ($_GET['user']=='actions' && $_GET['user_id']){
-			$str = 'SELECT * FROM user_action WHERE user_id="'.$_GET["user_id"].'"';
-		} else if ($_GET['session']){
-			$str = 'SELECT * FROM user_action WHERE session_id ="'.$_GET['session'].'"';
-		} else if ($_GET['user_session']){
-			$str = 'SELECT * FROM user WHERE session_id ="'.$_GET['user_session'].'"';
-		} else if ($_GET['user_articles']){
-			$str = 'SELECT data, action, client_time FROM user_action WHERE user_id="'.$_GET['user_articles'].'" AND action="open_article"';
-		}
-		
-		if ($str){
-			$arr = query($str);
-			echo json_encode($arr);
-		}
+	$users = array(
+		'jolu'=>'paiva1',
+		'koe3'=>'paiva1',
+		'heer'=>'paiva2',
+		'maki'=>'paiva2',
+		'koe2'=>'paiva2'
+	);
+
+	function checkLogin($username){
+		$_SESSION['login']= true;
+		$_SESSION['user'] = $_POST['login'];
+		$_SESSION['user_id'] = $_POST['login'];		
+		$_SESSION['session_id'] = session_id();
+		return true;
 	}
 
-
-
-	if (isset($_POST)){		
-		if (isset($_POST['userdata'])){
-
+	function login(){
+		if ($_POST['userdata']){		
 			$d = $_POST['userdata'];
 
-			$str = 'INSERT INTO user (user_id,session_id,start_time,window_x,window_y,screen_x,screen_y,media,type,vendor) VALUES( '
-						.'\''.$d['user_id'].'\', '
-						.'\''.$d['session_id'].'\', '
+			$str = 'INSERT INTO user (user_id,session_id,start_time,window_x,window_y,screen_x,screen_y,media,type,vendor,latitude,longitude,ip) VALUES( '
+						.'\''.$_SESSION['user'].'\', '
+						.'\''.session_id().'\', '
 						.$d['start_time'].', '
 						.$d['window'][0].', '
 						.$d['window'][1].', '
@@ -38,29 +30,58 @@
 						.$d['screen'][1].', '
 						.'\''.$d['media'].'\', '
 						.'\''.$d['type'].'\', '
-						.'\''.$d['vendor'].'\''
-						.' )';
+						.'\''.$d['vendor'].'\', '
+						.$d['latitude'].', '
+						.$d['longitude'].', '
+						.'\''.$_SERVER['REMOTE_ADDR'].'\''
+						.')';
 
-			save($str);
+
+		 	echo save($str);
+		}
+	}
 
 
-		} else if (isset($_POST['data'])){
+	if (isset($_POST)){	
+		if (isset($_POST['chklogin'])){
+			if ($_SESSION['login']){
+				echo json_encode(array('ok'=>true,'data'=>$_SESSION));
+			} else 	{
+				echo json_encode(array('ok'=>false));
+			}
+		}
+
+		if (isset($_POST['login'])){			
+			if (checkLogin($_POST['login'])){					
+				login();
+			} else {
+				echo json_encode(array('ok'=>false));
+			}
+		}
+
+
+
+
+		if (isset($_POST['data']) && $_SESSION['login']==true){
 			$d = $_POST['data'];
 			
-			$str = 'INSERT INTO user_action (user_id,session_id,client_time,action,event_type,data) VALUES( '						
-						.'\''.$d['user_id'].'\', '
-						.'\''.$d['session_id'].'\', '
+			$str = 'INSERT INTO user_action (user_id,session_id,client_time,action,event_type,data) VALUES( '
+						.'\''.$_SESSION['user'].'\', '
+						.'\''.session_id().'\', '
 						.$d['time'].', '
 						.'\''.$d['action'].'\', '
 						.'\''.$d['event_type'].'\', '
 						.'\''.$d['data'].'\''
-						.' )';
+						.' )';			
 			
-			
-			save($str);
+			echo save($str);
+
+		} else if (isset($_POST['data']) && $_SESSION['login']==false){
+			echo json_encode(array('ok'=>false));
 		}
 
 	}
+
 
 	function query($str){
 		try{
@@ -97,9 +118,9 @@
 			$result = $p->prepare($data);
 			$result->execute();
 
-			echo json_encode(array('ok'=>true));
+			return json_encode(array('ok'=>true));
 		} catch (PDOException $e){
-			echo json_encode(array('ok'=>false,'message'=>$e->getMessage()));
+			return json_encode(array('ok'=>false,'message'=>$e->getMessage()));
 		}
 	}
 

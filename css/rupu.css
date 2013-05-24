@@ -265,6 +265,13 @@ background-image: url('creampaper.png');
 }
 
 @media screen and (max-width: 600px){
+	#main-pane-content{
+		width: 98%;
+		margin-left: 1%;
+		padding-top: 10px;
+		padding-bottom: 20px;
+	}
+
 	#brand-display h2.title{
 		font-size: 20pt;
 	}
@@ -290,3 +297,5 @@ background-image: url('creampaper.png');
 
 	}
 }
+
+

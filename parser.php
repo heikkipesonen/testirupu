@@ -29,6 +29,7 @@
 			'title'=>(string)$simpleXml->channel->title,
 			'timestamp'=>microtime_float(),
 			'description'=>(string)$simpleXml->channel->description,
+			'language'=>(string)$simpleXml->channel->language,
 			'image'=>array(
 				'url'=>(string)$simpleXml->channel->image->url,
 				'link'=>(string)$simpleXml->channel->image->link,

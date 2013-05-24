@@ -36,7 +36,9 @@ var rupu = function(){
 
 	this._border = 0;
 	this._gutter = 16;
-
+	this._lang = 'fi';
+	this._maintitle = '';
+	this._subtitle = '';
 }
 
 rupu.prototype = {
@@ -177,6 +179,10 @@ rupu.prototype = {
 			},200);
 		});
 		
+		$(function(){
+			document.title = this._maintitle || '';
+		});
+
 		this._fire('start');	
 		this._getData();
 	},
@@ -220,8 +226,8 @@ rupu.prototype = {
 		if (!this._overlay){
 			this._overlay= $([
 				'<div id="overlay">',
-				'<h1 class="main-title">rupu 0.1</h1>',
- 				'<h3 class="sub-title">Metropolia AMK / Heikki Pesonen / 2013</h3>',
+				'<h1 class="main-title">',this._maintitle,'</h1>',
+ 				'<h3 class="sub-title">',this._subtitle,'</h3>',
  				'<img src="css/load-icon.png" alt="" class="clock-icon" />',
 				'</div>'
 			].join('')).css({
@@ -525,7 +531,13 @@ rupu.prototype = {
 			}
 		} else {
 			var e = this._getItem(id).getFull();
+			container.find('h1, h2, h3, h4').each(function(){
+				$(this).addClass('hyphenate text').attr('lang',me._lang);
+			});
 
+			Hyphenator.run();
+
+				
 			container.imagesLoaded(function(){
 				
 				container.transit({
@@ -547,16 +559,13 @@ rupu.prototype = {
 						}						
 					});
 
-					container.find('p, h1, h2, h3, h4, span').each(function(){
-						$(this).addClass('hyphenate text').attr('lang','fi');
-					});
-
 					/*
 					Hyphenator.config({
 						onhyphenationdonecallback:function(){
 						}
 					});
 					*/
+
 					container.transit({opacity:1});
 					
 					me._pageScroll = new iScroll('page',me.iscrollOpts);
@@ -650,12 +659,13 @@ rupu.prototype = {
 				gutter:gutter
 			});
 
-			me._scrollRefresh();			
-			//Hyphenator.run();
+			me._scrollRefresh();	
+
 
 			container.transit({
 				opacity:1
 			},200,function(){
+				Hyphenator.run();
 				me.loading(false);
 			});
 		});
@@ -675,7 +685,7 @@ rupu.prototype = {
 		
 			each(content,function(item){
 				item.find('p, h1, h2, h3, h4').each(function(){
-					$(this).addClass('hyphenate text').attr('lang','fi');
+					$(this).addClass('hyphenate text').attr('lang',me._lang);
 				});
 
 				
@@ -799,6 +809,8 @@ rupu.prototype = {
 							me._items.push( new newsitem(rs.data[i]));
 						}								
 						me._source = rs.source;
+						me._lang = rs.source.language;
+
 						me._getCategories();
 						me._fire('load',me._items);
 					} else {

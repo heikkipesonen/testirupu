@@ -193,6 +193,26 @@
 
 
 @media screen and (max-width: 600px){
+	#page .news-page.tall-image .image-item-header-container .text-arrow{
+		display: block;
+		position: absolute;
+		
+		width: 32px;
+		height: 32px;
+		bottom: 10%;
+		left: -16px;
+
+		-webkit-transform: rotate(45deg);
+		-moz--transform: rotate(45deg);
+		-o-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+	}
+	
+	#page-scroll{
+		width: 100%;
+		margin: 0%;
+	}
+
 	#page .news-page h1{
 		font-size: 18pt;
 		padding-top: 5px;

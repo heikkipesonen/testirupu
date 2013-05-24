@@ -347,6 +347,17 @@
 
 
 @media screen and (max-width: 600px){
+	.newsitem.tall-image.double-size .newsitem-imagecontainer .image-item-header-container .text-arrow,.newsitem.tall-image.one-row .newsitem-imagecontainer .image-item-header-container .text-arrow{
+		width: 32px;
+		height: 32px;
+		bottom: 10%;
+		left: -16px;
+
+		-webkit-transform: rotate(45deg);
+		-moz--transform: rotate(45deg);
+		-o-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+	}	
 	.newsitem.tall-image.double-size .newsitem-imagecontainer .image-item-header-container h2,.newsitem.tall-image.one-row .newsitem-imagecontainer .image-item-header-container h2{	
 		font-size: 16pt;
 	}
