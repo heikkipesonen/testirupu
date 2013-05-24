@@ -185,6 +185,8 @@ rupu.prototype = {
 
 		this._fire('start');	
 		this._getData();
+
+		me._fire('tracker',{'action':'restart','event_type':'page reload','data':''});
 	},
 	loading:function(show){
 		var me = this;
@@ -261,9 +263,9 @@ rupu.prototype = {
 		}
 	},
 	error:function(e){
-		console.log(e.stack);
-
+		if (e.stack) console.log(e.stack);
 		this._fire('tracker',{'action':'error','event_type':'error','data':e.message});
+		
 		this.overlay(true);
 		this._overlay.append('<h3 class="error">something is not quite right just now. try again later :(</h3>')
 	},
@@ -348,10 +350,10 @@ rupu.prototype = {
 		this._fire('scale');
 		this._showPane(this._currentPane);
 	},
-	_animate:function(distance,time){	
+	_animate:function(distance,callback){	
 		var lastStep = 0,
 		me = this;
-		if (!time) time = 200;
+		
 
 		this._dummy.stop();
 		this._dummy.css('width','100px');
@@ -366,7 +368,8 @@ rupu.prototype = {
 				lastStep = cdist;
 
 			},
-			duration:time
+			duration:200,
+			complete:callback
 		});
 	},
 	_drag:function(distance){
@@ -380,13 +383,12 @@ rupu.prototype = {
 			diffToMain = this._mainPos-position,
 			diffToRight = this._rightPos-position,
 			diffToLeft = this._leftPos-position;
-
-		
-		var panToright = Math.abs( diffToRight )< (this.panes.right.outerWidth(true)/1.5) ? true : position < this._rightPos;
+	
+		var panToright = Math.abs( diffToRight )< (this.panes.right.outerWidth(true)/2) ? true : position < this._rightPos;
 		var panToLeft = Math.abs( diffToLeft ) < (this.panes.left.outerWidth(true)/2) ? true : position > this._leftPos;
 
 		if (panToright){
-			if (this._currentPane != 'right-pane'){				
+			if (this._currentPane != 'right-pane'){		
 				me._fire('tracker',{'action':'show_menu','event_type':'drag','data':'right-pane'});
 			}
 			this._showPane('right-pane');
@@ -408,9 +410,9 @@ rupu.prototype = {
 		}
 
 		if (this._lastEvent){
-			if (this._lastEvent.gesture.velocityX > 2.5){
+			if (this._lastEvent.gesture.velocityX > 2.0 || Math.abs(this._lastEvent.gesture.deltaX > 150)){
 				if (this._lastEvent.gesture.direction == 'left'){
-					if (Math.abs(diffToLeft)<Math.abs(diffToMain)){						
+					if (this._currentPane == 'left-pane'){//Math.abs(diffToLeft)<Math.abs(diffToMain)){						
 						//me._fire('swipeTo','main-pane');
 						if (this._currentPane == 'left-pane'){
 							me._fire('tracker',{'action':'close_article','event_type':'swipe','data':this.getVisibleItem()});
@@ -424,11 +426,13 @@ rupu.prototype = {
 							me._fire('tracker',{'action':'close_category','event_type':'swipe','data':this._currentCategory});
 							me._fire('tracker',{'action':'show_menu','event_type':'swipe','data':'right-pane'});
 						}
-						this._showPane('right-pane');						
+
+						this._showPane('right-pane');
 					}
 
 				} else if (this._lastEvent.gesture.direction == 'right'){
-					if (Math.abs(diffToRight)<Math.abs(diffToMain)){
+					
+					if (this._currentPane == 'right-pane'){//Math.abs(diffToRight)<Math.abs(diffToMain)){
 						//me._fire('swipeTo','main-pane');
 						if (this._currentPane != 'main-pane'){
 							me._fire('tracker',{'action':'open_category','event_type':'swipe','data':this._currentCategory});
@@ -439,7 +443,10 @@ rupu.prototype = {
 						if (this._currentPane != 'left-pane'){
 							me._fire('tracker',{'action':'open_article','event_type':'swipe','data':this.getVisibleItem()});
 							me._fire('tracker',{'action':'show_pane','event_type':'swipe','data':'left-pane'});
-						}
+						} 
+
+						
+						
 						this._showPane('left-pane');
 					}
 				}
@@ -447,10 +454,7 @@ rupu.prototype = {
 		}
 	},
 	// scroll to certain pane with _mainScroll-horizontal scroll
-	_showPane:function(id,time){
-		if (time==undefined){
-			time=300;
-		}
+	_showPane:function(id,callback){
 		var position = 0;
 		if (id == 'main-pane'){
 			if (this._currentCategory){
@@ -460,13 +464,22 @@ rupu.prototype = {
 				return;
 			}
 		} else if (id == 'left-pane'){
-			if (this.panes.left.children().length > 0){			
+			if (this.panes.left.children().length > 0){
+				if (this._currentPane == 'right-pane'){
+					this._showPane('main-pane');
+					return;
+				}
 				position = 0;
 			} else {
 				this._showPane('main-pane');
 				return;
 			}
 		} else if (id == 'right-pane'){
+			if (this._currentPane == 'left-pane'){
+				this._showPane(main-pane);
+				return;
+			}
+
 			position = -(this.panes.left.outerWidth(true) + this.panes.right.outerWidth(true));
 		}
 
@@ -474,7 +487,7 @@ rupu.prototype = {
 
 		this._currentPane = id;
 
-		this._animate(diff);
+		this._animate(diff,callback);
 		this._fire('showPane',id);
 	},	
 	_sortSet:function(items){
@@ -506,18 +519,20 @@ rupu.prototype = {
 			e.push(item.getTile());
 		});
 
+		//e.unshift( $('<div class="category-title"><h2>'+this._currentCategory+'</h2></div>') );
+		
 		this._showAtPane(e);
 		this._fire('showItems',items);
 	},
-	showCategory:function(cat){
-		
+	showCategory:function(cat){		
 		cat = cat.toLowerCase();
 		this._currentCategory = cat;
 
 		var items = this.getCategory(cat);
+
 		this.showItems(items);
-	
 		this._container.css('background-color',colors.getColor(cat,1));
+		
 		this._fire('showCategory',cat);	
 	},
 	// show news item in left pane display
@@ -531,12 +546,6 @@ rupu.prototype = {
 			}
 		} else {
 			var e = this._getItem(id).getFull();
-			container.find('h1, h2, h3, h4').each(function(){
-				$(this).addClass('hyphenate text').attr('lang',me._lang);
-			});
-
-			Hyphenator.run();
-
 				
 			container.imagesLoaded(function(){
 				
@@ -544,6 +553,12 @@ rupu.prototype = {
 					opacity:0,
 				},200,function(){
 					container.html(e);
+					/*
+					container.find('h1, h2, h3, h4').each(function(){
+						$(this).addClass('hyphenate text').attr('lang',me._lang);
+					});
+					*/
+					//Hyphenator.run();
 
 					if (scrollTo!=false){
 						me._showPane('left-pane');
@@ -559,19 +574,10 @@ rupu.prototype = {
 						}						
 					});
 
-					/*
-					Hyphenator.config({
-						onhyphenationdonecallback:function(){
-						}
-					});
-					*/
-
 					container.transit({opacity:1});
 					
 					me._pageScroll = new iScroll('page',me.iscrollOpts);
 					me._fire('showItem',id);
-
-					//me._fire('tracker',{'action':'open_article','event_type':'tap','data':id});
 				});
 			});
 		}
@@ -620,12 +626,15 @@ rupu.prototype = {
 
 		container.imagesLoaded(function(){
 
-			container.find('.tile').each(function(){
+			container.find('.tile, .category-title').each(function(){
 				$(this).css({
 					'width':me._itemWidth,
 				});
 
-				
+				if ($(this).hasClass('category-title')){
+					$(this).css('width',container.innerWidth());
+				}
+
 				if ($(this).width() >= 0.8*container.innerWidth()){
 					$(this).addClass('one-row');					
 				} else {
@@ -648,11 +657,8 @@ rupu.prototype = {
 				} else if (parseInt( $(this).attr('priority') )> 6 && (me._itemWidth/2)>190 && $(this).hasClass('no-image') && container.find('.tile').length > 4){
 					var w = (me._itemWidth - gutter)/2 > 300 ? (me._itemWidth - 2*gutter)/3 : (me._itemWidth - gutter)/2;
 					$(this).css('width',Math.floor( (w) - (border*2)-1 ))
-							//.css('height',((me._itemWidth/2) - (gutter/2) - (border*2))/2 )
 							.addClass('small-item');
 				}
-
-
 			});
 
 			var p = new Packery(container[0],{				
@@ -664,8 +670,8 @@ rupu.prototype = {
 
 			container.transit({
 				opacity:1
-			},200,function(){
-				Hyphenator.run();
+			},500,function(){
+				//Hyphenator.run();
 				me.loading(false);
 			});
 		});
@@ -673,37 +679,39 @@ rupu.prototype = {
 	_showAtPane:function(content){
 		var container = this.panes.main_content;
 		var me = this;
-			me._showPane('main-pane');
-		
 		this._fire('pageChangeStart');
-	
-		container.transit({
-			opacity:0
-		},200,function(){
-	
-			container.empty();
 		
-			each(content,function(item){
-				item.find('p, h1, h2, h3, h4').each(function(){
-					$(this).addClass('hyphenate text').attr('lang',me._lang);
-				});
-
+			me._showPane('main-pane',function(){
+								
+					container.transit({
+						opacity:0
+					},200,function(){
 				
-				item.hammer().on('tap',function(){
-					if ($(this).hasClass('newsitem')){
-						me.showItem($(this).attr('id'));	
-						me._fire('tracker',{'action':'open_article','event_type':'tap','data':$(this).attr('id')});
-					} else if ($(this).hasClass('category')){
-						me.showCategory($(this).attr('id'));
-					}
-				});
-				container.append(item);
+						container.empty();
+					
+						each(content,function(item){
+							/*
+							item.find('p, h1, h2, h3, h4').each(function(){
+								$(this).addClass('hyphenate text').attr('lang',me._lang);
+								
+							});
+							*/
+							
+							item.hammer().on('tap',function(){
+								if ($(this).hasClass('newsitem')){
+									me.showItem($(this).attr('id'));	
+									me._fire('tracker',{'action':'open_article','event_type':'tap','data':$(this).attr('id')});
+								} else if ($(this).hasClass('category')){
+									me.showCategory($(this).attr('id'));
+								}
+							});
+							container.append(item);
+						});
 
-			});
+						me._tile();
 
-			me._tile();
-
-		});
+					});
+			});	
 	},
 	_getCategories:function(){
 		var categories = {};
@@ -722,9 +730,9 @@ rupu.prototype = {
 		this._getCategories();
 		var result = [];
 		for (var i in this._categories){
-			if (i.toLowerCase()!='etusivu'){
+			//if (i.toLowerCase()!='etusivu'){
 				result.push(i);
-			}
+			//}
 		}
 		return result;
 	},
@@ -732,40 +740,12 @@ rupu.prototype = {
 		var result = [];
 		name = name.toLowerCase();
 		
-		if (name == 'etusivu'){
-			result = this._makeFrontPage();
-
-		} else {
-			for (var i in this._items){
-				if (this._items[i].category.toLowerCase() == name){
-					result.push(this._items[i]);
-				}
+		for (var i in this._items){
+			if (this._items[i].category.toLowerCase() == name){
+				result.push(this._items[i]);
 			}
 		}
 		return result;
-	},
-	_getFromCouch:function(){
-		var me = this;
-		$.ajax({
-			url:'http://cdb.ereading.metropolia.fi/reader/_design/news/_view/strdate?key=%222013.05.15%22',
-			dataType:'json',
-			success:function(e){		
-				for (var i in e.rows){
-					if (e.rows[i].value.content){
-						e.rows[i].value.image = e.rows[i].value.content;
-
-						for (var c in e.rows[i].value.image){
-							e.rows[i].value.image[c].url = 'http://ereading.metropolia.fi/puru/img/'+e.rows[i].value.image[c].name;
-						}
-					}
-
-					me._items.push( new newsitem(e.rows[i].value));
-				}
-
-				me._getCategories();
-				me._fire('load');
-			}
-		})
 	},
 	_makeFrontPage:function(){
 		var frontPage = [];
@@ -797,12 +777,13 @@ rupu.prototype = {
 	},
 	_getData:function(){
 		var me = this;		
+		var d = Date.now();
+
 			$.ajax({
 				url:parserURL,
 				dataType:'JSON',
 				success:function(e){
 					var rs = JSON.parse(e);
-
 					
 					if (rs.status == 'ok'){						
 						for (var i in rs.data){
@@ -812,11 +793,14 @@ rupu.prototype = {
 						me._lang = rs.source.language;
 
 						me._getCategories();
-						me._fire('load',me._items);
-					} else {
 						
+						var d2 = Date.now(),
+							time = d2 - d;
 
-						me._getFromCouch();
+						me._fire('load',me._items);
+						me._fire('tracker',{'action':'xml-load','event_type':'data load','data':time});
+					} else {
+						me._error(rs);
 					}
 				},
 				error:function(e){

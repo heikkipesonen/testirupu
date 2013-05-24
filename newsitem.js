@@ -87,9 +87,7 @@ newsitem.prototype = {
 					'</div>',
 				'</div>',
 				].join('');
-
-				console.log(this.image)
-			hasImage = 'has-image';
+				hasImage = 'has-image';
 		} else {
 			image = '<div class="page-header-container"  style="'+colors.getBackground(this.category,1)+'" ><h1 class="news-header">'+this.title+'</h1></div>';
 		}

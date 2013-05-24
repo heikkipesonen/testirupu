@@ -275,6 +275,16 @@
 .text-arrow{
 	display: none;
 }
+.category-title{
+	position: relative;
+	
+}
+.category-title h2{
+	font-size: 30pt;
+	text-align: center;
+	color: rgba(250,250,250,0.9);
+	text-transform: uppercase;
+}
 
 .newsitem.tall-image.double-size .newsitem-imagecontainer .image-item-header-container .text-arrow,.newsitem.tall-image.one-row .newsitem-imagecontainer .image-item-header-container .text-arrow{
 	display: block;

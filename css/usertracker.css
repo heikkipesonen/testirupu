@@ -37,9 +37,10 @@
 
 #usertracker-login{
 	position: fixed;
+	z-index: 1000;
 	width: 100%;	
 	height: 100%;
-	background-color: rgba(0,0,0,0.5);	
+	background-color: rgba(0,0,0,0.7);	
 }
 
 #usertracker-login input{
@@ -52,6 +53,20 @@
 	font-size: 20px;
 	border: 0px;
 	border-radius: 5px;
+}
+
+#usertracker-login h3{	
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
+	width: 100%;
+	margin-bottom: 20px;
+	text-align: center;
+	
+	
+	font-size: 26pt;
+	font-weight: bold;
+	color: #aaa;
 }
 
 #usertracker-login button{	

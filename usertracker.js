@@ -1,4 +1,4 @@
-function userTracker(_rupu){
+function userTracker(_rupu,username){
 	var me = this;
 	this._rupu = _rupu;	
 	this.bind();
@@ -7,126 +7,44 @@ function userTracker(_rupu){
 	this._db = new ajaxQueue({url:'usertracker.php',dataType:'json',type:'POST'});
 	
 	this._userData = {
-		'user_id':false,
-		'session_id':getId(),
+		'user_id':username,		
 		'start_time':Date.now(),
 		'window':[window.innerWidth,window.innerHeight],
 		'screen':[window.screen.width,window.screen.height],
 		'media':window.styleMedia.type,
 		'type':navigator.userAgent,
-		'vendor':navigator.vendor
+		'vendor':navigator.vendor,
+		'latitude':0,
+		'longitude':0
 	}
 
-	this._form = $([
-		'<div id="usertracker-login">',	
-			'<div id="usertracker-login-input-container">',
-				'<input type="text" id="username" placeholder="username"></input>',
-				'<button>ok</button>',
-			'</div>',
-		'</div>'
-	].join(''));
-
-	this._info = $( [
-		'<div id="usertracker">',
-			'<h3></h3>',
-			'<span>tracking</span>',
-		'</div>'
-		].join('') );
-
-	this._location = [0,0];	
-	
-	this._form.find('#username').focusout(function(){
-		me._hideForm();
-		me.setUser();
-	}).keyup(function(e){
-		if (e.keyCode == 13){
-			me._hideForm();
-			me.setUser();				
-		}
-	});
-	this._info.hammer().on('tap',function(){
-		me._showForm();
-	});
-
-	
 	if (navigator.geolocation){
 		navigator.geolocation.getCurrentPosition(function(e){
 			me._userData.latitude = e.coords.latitude;
 			me._userData.longitude = e.coords.longitude;
-			me._getSession();
+			me._setUser();
 		});
 	} else {
-		me._getSession();
+		this._setUser();
 	}
+
 }
 
 userTracker.prototype = {
-	visibleitem:false,
-	pane:false,
-	_showTracker:function(){
-		$('#wrapper').append(this._info);
-		
-		var me = this;
-		this._form.find('#username').val(this._userData.user_id).focus(); 
-	},
-	_hideTracker:function(){
-		this._info.remove();
-	},
-	_showForm:function(){
-		$('#wrapper').append(this._form);
-	},
-	_getUsername:function(){
-		return this._form.find('#username').val();
-	},
-	_hideForm:function(){
-		this._form.css('display','none');
-	},
-	_getData:function(data,_callback){
-		$.ajax({
-			url:'usertracker.php',
-			dataType:'json',
-			data:data,
-			type:'POST',
-			success:_callback,
-			error:_callback
-		});
-	},
-	_getSession:function(_callback){
-		var me = this;
-		this._getData({
-			chklogin:true,
-		},function(e){
-			if (e.ok == true){
-				me._userData.user_id = e.data.user_id;
-				me._showTracker();
-				me._info.find('h3').text(me._userData.user_id);
-			} else {
-				me._showForm();
+	_setUser:function(){
+		if (!this._userData.user_id){			
+			if (!localStorage.getItem('rupu_id')){
+				localStorage.setItem('rupu_id',getId());
 			}
-		})
-	},
-	setUser:function(){
-		var me = this;
-
-		this._getData({
-			login:me._getUsername(),
-			userdata:me._userData
-		},function(e){
-			if (e.ok == true || e.ok == 'true'){
-				me._userData.user_id = me._getUsername();
-				me._info.find('h3').text(me._userData.user_id);
-				me._showTracker();
-			} else {
-				me._showForm();
-			}
-		});
-		/*
-		if (!localStorage.getItem('rupu_id')){
-			localStorage.setItem('rupu_id',getId());
+			this._userData.user_id = localStorage.getItem('rupu_id');
 		}
-		this._userId = localStorage.getItem('rupu_id');
-		localStorage.setItem('rupu_id',this._userId);
-		*/
+		
+		localStorage.setItem('rupu_id',this._userData.user_id);
+
+		this._db.add({
+			login:this._userData.user_id,
+			userdata:this._userData
+		});
 	},
 	bind:function(rupu){
 		var me = this;
@@ -135,10 +53,20 @@ userTracker.prototype = {
 			e.time = Date.now();
 			e.user_id = me._userData.user_id;
 			e.session_id = me._userData.session_id;
+			e.latitude = me._userData.latitude;
+			e.longitude = me._userData.longitude;
 			me._db.add({data:e});
 		});
 	}
 }
+
+
+
+
+
+
+
+
 
 function ajaxQueue(args,oncomplete){	
 	this._args = args;
@@ -171,7 +99,6 @@ ajaxQueue.prototype = {
 	_send:function(data){
 		var me = this;
 		this._busy = true;
-console.log(data)
 		$.ajax({
 			url:this._args.url,
 			dataType:this._args.dataType,
